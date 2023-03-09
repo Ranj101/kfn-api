@@ -65,6 +65,4 @@ Contributions from the community are also welcomed! Please follow these guidelin
 
 ### License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/Ranj101/kfn-api/blob/main/LICENSE.md) file for details.
