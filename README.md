@@ -1,6 +1,12 @@
 ## Kurdistan Food Network
 
-Welcome to Kurdistan Food Network, an open source project that aims to support local producers in the Kurdistan region of Iraq by providing a digital platform to showcase and sell their goods and services.
+Welcome to Kurdistan Food Network, an open source project that aims to support local producers in the Kurdistan region of Iraq.
+
+The Kurdistan Food Network project was started to help local producers in the Kurdistan region of Iraq to gain more visibility and sell their goods and services to a wider audience. The project provides a digital platform where local producers can create profiles and showcase their products, while customers can browse and place orders for available goods and services.
+
+I believe that supporting local producers is important for building stronger, more sustainable communities. By creating a platform that connects producers and customers, I hope to encourage the growth of small businesses and provide customers with access to a wider range of high-quality, locally produced products.
+
+The project is open source and I welcome contributions from anyone who is interested in helping to improve the platform. Whether you're a developer, designer, or just interested in supporting local producers, there are many ways to get involved. I hope that this project can serve as a model for other communities looking to build similar platforms and support local producers.
 
 This repository contains the source code for the api component in the Kurdistan Food Network Project.
 
