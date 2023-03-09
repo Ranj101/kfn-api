@@ -1,8 +1,8 @@
 ## Kurdistan Food Network
 
-<div style="text-align:center">
+<p align="center" width="100%">
     <img src="https://i.imgur.com/ZlN0rQW.png"  width="460" height="252" alt="">
-</div>
+</p>
 
 Welcome to Kurdistan Food Network, an open source project that aims to support local producers in the Kurdistan region of Iraq.
 
