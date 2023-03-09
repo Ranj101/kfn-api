@@ -23,7 +23,7 @@ The docker compose will provide you with:
 #### 2. Clone the repository: 
 
 ```sh
-git clone https://github.com/Ranj101/kurdistan-food-network.git
+git clone https://github.com/Ranj101/kfn-api.git
 ```
 
 #### 3. Run the following command to start the application.
