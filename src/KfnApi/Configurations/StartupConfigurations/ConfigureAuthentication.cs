@@ -29,7 +29,7 @@ public static partial class StartupConfigurations
                 options.Authority = authOptions!.AuthorityUrl;
                 options.Audience = authOptions.Audience;
             })
-            .AddScheme<AuthenticationSchemeOptions, UserHandler>(Constants.AuthScheme, options => {});
+            .AddScheme<AuthenticationSchemeOptions, UserAuthHandler>(Constants.AuthScheme, _ => {});
 
         return services;
     }
@@ -38,7 +38,7 @@ public static partial class StartupConfigurations
     {
         services.AddHttpClient(AuthDefaults.IdentityClient, client =>
                 client.BaseAddress = new Uri(authOptions.AuthorityUrl))
-        .AddPolicyHandler(HttpPolicyExtensions
+                .AddPolicyHandler(HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
 
@@ -46,10 +46,10 @@ public static partial class StartupConfigurations
 
         services.AddHttpClient(AuthDefaults.IdentityWrapperClient, client =>
                 client.BaseAddress = new Uri(authOptions.WrapperUrl))
-            .AddHttpMessageHandler<MachineToMachineBearerTokenHandler>()
-            .AddPolicyHandler(HttpPolicyExtensions
-                    .HandleTransientHttpError()
-                    .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+                .AddHttpMessageHandler<MachineToMachineBearerTokenHandler>()
+                .AddPolicyHandler(HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
 
         return services;
     }

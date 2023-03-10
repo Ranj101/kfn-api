@@ -1,24 +1,28 @@
 ﻿using System.Security.Claims;
 using System.Text.Encodings.Web;
+using KfnApi.Abstractions;
 using KfnApi.Errors.Exceptions;
-using KfnApi.Services;
+using KfnApi.Models.Entities;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
 namespace KfnApi.Helpers.Authentication;
 
-public class UserHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public class UserAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    private readonly UserService _userService;
+    private readonly IUserService _userService;
+    private readonly IAuthContext _authContext;
 
-    public UserHandler(
+    public UserAuthHandler(
         UrlEncoder encoder,
         ILoggerFactory logger,
-        UserService userService,
+        IUserService userService,
+        IAuthContext authContext,
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ISystemClock clock) : base(options, logger, encoder, clock)
     {
         _userService = userService;
+        _authContext = authContext;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -33,10 +37,23 @@ public class UserHandler : AuthenticationHandler<AuthenticationSchemeOptions>
         if(user is null)
             return AuthenticateResult.Fail(new AuthException("User identity not found."));
 
-        await _userService.UpsertCacheAsync(user);
+        _authContext.SetUser(user);
 
-        throw new NotImplementedException();
+        var claimsIdentity = new ClaimsIdentity(GenerateClaims(user), nameof(UserAuthHandler));
+        var ticket = new AuthenticationTicket(new ClaimsPrincipal(claimsIdentity), Scheme.Name);
+        return AuthenticateResult.Success(ticket);
+    }
 
-        return await base.AuthenticateAsync();
+    private static IEnumerable<Claim> GenerateClaims(in User user)
+    {
+        var claims = new List<Claim>
+        {
+            new (ClaimTypes.NameIdentifier, user.Id)
+        };
+
+        claims.AddRange(user.Roles.Select(role
+            => new Claim(ClaimTypes.Role, role)));
+
+        return claims;
     }
 }
