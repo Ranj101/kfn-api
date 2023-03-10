@@ -9,6 +9,8 @@ services.AddEndpointsApiExplorer();
 
 services.ConfigureSwagger();
 
+services.ConfigureDatabase(configuration);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
