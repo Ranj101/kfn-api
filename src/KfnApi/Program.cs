@@ -9,7 +9,8 @@ services.AddEndpointsApiExplorer();
 
 services.ConfigureSwagger();
 
-services.ConfigureDatabase(configuration);
+services.ConfigureCache(configuration)
+        .ConfigureDatabase(configuration);
 
 var app = builder.Build();
 
