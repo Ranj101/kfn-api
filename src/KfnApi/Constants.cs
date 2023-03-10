@@ -5,6 +5,8 @@ namespace KfnApi;
 
 public static class Constants
 {
+    public const string AuthScheme = "userAuthScheme";
+
     public static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

@@ -1,5 +1,6 @@
 ﻿using KfnApi.Helpers.Authentication;
 using KfnApi.Models.Settings;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Polly;
 using Polly.Extensions.Http;
@@ -27,7 +28,8 @@ public static partial class StartupConfigurations
             {
                 options.Authority = authOptions!.AuthorityUrl;
                 options.Audience = authOptions.Audience;
-            });
+            })
+            .AddScheme<AuthenticationSchemeOptions, UserHandler>(Constants.AuthScheme, options => {});
 
         return services;
     }
