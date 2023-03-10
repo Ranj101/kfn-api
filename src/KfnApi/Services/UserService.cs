@@ -46,7 +46,7 @@ public class UserService : IUserService
         var userRoles = new List<string> { Roles.Customer };
 
         if (authUser.AppMetadata.Roles.Contains("kfn-admin"))
-            userRoles.Add(Roles.SuperAdmin);
+            userRoles.AddRange(new []{Roles.SuperAdmin, Roles.SystemAdmin});
 
         var newUser = new User
         {
@@ -58,16 +58,11 @@ public class UserService : IUserService
             Username = authUser.Username
         };
 
-        try
-        {
-            var entry = await _databaseContext.Users.AddAsync(newUser);
-            await _databaseContext.SaveChangesAsync();
-            return entry.Entity;
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
+        var entry = await _databaseContext.Users.AddAsync(newUser);
+        await _databaseContext.SaveChangesAsync();
+
+        await UpsertCacheAsync(entry.Entity);
+        return entry.Entity;
     }
 
     public async Task UpsertCacheAsync(User user)
