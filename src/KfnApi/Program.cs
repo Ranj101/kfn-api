@@ -1,8 +1,13 @@
-var builder = WebApplication.CreateBuilder(args);
+using KfnApi.Configurations.StartupConfigurations;
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+var builder = WebApplication.CreateBuilder(args);
+var services = builder.Services;
+var configuration = builder.Configuration;
+
+services.AddControllers();
+services.AddEndpointsApiExplorer();
+
+services.ConfigureSwagger();
 
 var app = builder.Build();
 
