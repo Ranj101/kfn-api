@@ -2,7 +2,7 @@
 
 namespace KfnApi.Models.Settings;
 
-public class PostgresOptions
+public sealed record PostgresOptions
 {
     public const string SectionName = "Postgres";
 

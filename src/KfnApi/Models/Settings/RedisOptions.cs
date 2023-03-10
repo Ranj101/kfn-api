@@ -2,7 +2,7 @@
 
 namespace KfnApi.Models.Settings;
 
-public class RedisOptions
+public sealed record RedisOptions
 {
     public const string SectionName = "Redis";
 
