@@ -7,7 +7,8 @@ var configuration = builder.Configuration;
 services.AddControllers();
 services.AddEndpointsApiExplorer();
 
-services.ConfigureSwagger();
+services.ConfigureSwagger()
+        .ConfigureDependencies();
 
 services.ConfigureCache(configuration)
         .ConfigureDatabase(configuration)
