@@ -25,6 +25,16 @@ public class UserAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
         _authContext = authContext;
     }
 
+    protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
+    {
+        var result = await HandleAuthenticateOnceSafeAsync();
+        if (result.Failure is not AuthException e)
+            return;
+
+        Response.StatusCode = StatusCodes.Status403Forbidden;
+        await Response.WriteAsJsonAsync(e.Message);
+    }
+
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         var userSub = Context.User.Claims.FirstOrDefault(c => c.Type is ClaimTypes.NameIdentifier)?.Value;

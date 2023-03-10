@@ -11,6 +11,7 @@ public partial class StartupConfigurations
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthContext, AuthContext>();
         services.AddScoped<IRemoteUserService, RemoteUserService>();
+        services.AddScoped<IPermissionService, PermissionService>();
 
         services.AddSingleton<IRoleMap, RoleMap>();
 

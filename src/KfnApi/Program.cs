@@ -8,7 +8,8 @@ services.AddControllers();
 services.AddEndpointsApiExplorer();
 
 services.ConfigureSwagger()
-        .ConfigureDependencies();
+        .ConfigureDependencies()
+        .ConfigureAuthorization();
 
 services.ConfigureCache(configuration)
         .ConfigureDatabase(configuration)
