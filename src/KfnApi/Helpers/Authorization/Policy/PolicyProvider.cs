@@ -31,9 +31,12 @@ public class PolicyProvider : IAuthorizationPolicyProvider
         return policy.Build();
     }
 
-    public Task<AuthorizationPolicy> GetDefaultPolicyAsync()
+    public async Task<AuthorizationPolicy> GetDefaultPolicyAsync()
     {
-        return Task.FromResult(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+        var allSchemes = await _authenticationSchemeProvider.GetAllSchemesAsync();
+        var defaultPolicyBuilder = new AuthorizationPolicyBuilder(allSchemes.Select(s => s.Name).ToArray());
+
+        return defaultPolicyBuilder.RequireAuthenticatedUser().Build();
     }
 
     public Task<AuthorizationPolicy?> GetFallbackPolicyAsync()
