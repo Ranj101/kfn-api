@@ -36,6 +36,12 @@ public class UserService : IUserService
         return dbUser;
     }
 
+    public async Task<List<User>> GetAllUsersAsync()
+    {
+        var users = await _databaseContext.Users.ToListAsync();
+        return users;
+    }
+
     public async Task<User?> EnrollUserAsync(string id)
     {
         var authUser = await _users.GetByIdAsync(id);

@@ -5,6 +5,7 @@ namespace KfnApi.Abstractions;
 public interface IUserService
 {
     Task<User?> GetByIdAsync(string id);
+    Task<List<User>> GetAllUsersAsync();
     Task<User?> EnrollUserAsync(string id);
     Task UpsertCacheAsync(User user);
 }
