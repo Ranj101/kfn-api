@@ -39,8 +39,10 @@ public class UserAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
     {
         var userSub = Context.User.Claims.FirstOrDefault(c => c.Type is ClaimTypes.NameIdentifier)?.Value;
 
+        // 1. JWT handler never adds claims from invalid tokens.
+        // 2. Valid tokens MUST always have a name identifier attached.
         if (string.IsNullOrEmpty(userSub))
-            return AuthenticateResult.Fail(new AuthException("Name identifier header is missing."));
+            return AuthenticateResult.NoResult();
 
         var user = await _userService.GetByIdAsync(userSub) ?? await _userService.EnrollUserAsync(userSub);
 
