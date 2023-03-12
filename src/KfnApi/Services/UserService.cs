@@ -51,7 +51,7 @@ public class UserService : IUserService
 
         var userRoles = new List<string> { Roles.Customer };
 
-        if (authUser.AppMetadata.Roles.Contains("kfn-admin"))
+        if (authUser.Roles.Contains("kfn-admin"))
             userRoles.AddRange(new []{Roles.SuperAdmin, Roles.SystemAdmin});
 
         var newUser = new User
@@ -61,7 +61,9 @@ public class UserService : IUserService
             Email = authUser.Email,
             FirstName = authUser.Name,
             LastName = authUser.Nickname,
-            Username = authUser.Username
+            CreatedAt = authUser.CreatedAt,
+            UpdatedAt = authUser.UpdatedAt,
+            Providers = authUser.Identities.Select(i => i.Provider).ToList()
         };
 
         var entry = await _databaseContext.Users.AddAsync(newUser);
