@@ -65,8 +65,8 @@ public class MachineToMachineBearerTokenHandler : DelegatingHandler
         }
 
         var expiresInTime = TimeSpan.FromSeconds(response.ExpiresIn);
-        if (expiresInTime > TimeSpan.FromMinutes(6))
-            expiresInTime -= TimeSpan.FromMinutes(5);
+        // if (expiresInTime > TimeSpan.FromMinutes(6))
+        //     expiresInTime -= TimeSpan.FromMinutes(5);
 
         await _cache.SetAsync(
             M2MTokenKey,
