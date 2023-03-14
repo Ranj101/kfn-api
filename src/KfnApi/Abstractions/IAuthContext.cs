@@ -6,7 +6,6 @@ namespace KfnApi.Abstractions;
 public interface IAuthContext
 {
     bool HasUser();
-    string GetUserId();
     User GetUser();
     bool IsAdmin();
     bool IsSuperAdmin();

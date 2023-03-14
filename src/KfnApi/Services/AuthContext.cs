@@ -21,9 +21,6 @@ public class AuthContext : IAuthContext
     public bool HasUser()
         => _user is not null;
 
-    public string GetUserId()
-        => _user!.Id;
-
     public User GetUser()
         => _user!;
 
