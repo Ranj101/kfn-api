@@ -22,7 +22,12 @@ public class UsersController : ControllerBase
     [HttpGet("self")]
     public async Task<IActionResult> GetSelfAsync()
     {
-        throw new NotImplementedException();
+        var user = await _service.GetSelfAsync();
+
+        if (user is null)
+            return NotFound();
+
+        return Ok(user.ToProfileResponse());
     }
 
     [HttpPatch("self")]
@@ -32,15 +37,22 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("profiles")]
-    public async Task<IActionResult> GetProfilesAsync()
+    public async Task<IActionResult> GetProfilesAsync([FromQuery] GetAllUsersRequest request)
     {
-        throw new NotImplementedException();
+        var paginated = await _service.GetAllUsersAsync(request);
+        var profiles = paginated.Select(user => user.ToProfileResponse()).ToList();
+        return Ok(paginated.ToPaginatedResponse(profiles));
     }
 
     [HttpGet("profiles/{id}")]
     public async Task<IActionResult> GetProfileAsync(string id)
     {
-        throw new NotImplementedException();
+        var user = await _service.GetByIdAsync(id);
+
+        if (user is null)
+            return NotFound();
+
+        return Ok(user.ToProfileResponse());
     }
 
     [HttpGet]
@@ -53,7 +65,12 @@ public class UsersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserAsync(string id)
     {
-        throw new NotImplementedException();
+        var user = await _service.GetByIdAsync(id);
+
+        if (user is null)
+            return NotFound();
+
+        return Ok(user);
     }
 
     [HttpPut("{id}")]

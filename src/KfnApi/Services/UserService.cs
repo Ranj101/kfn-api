@@ -22,12 +22,14 @@ public class UserService : IUserService
 
     private readonly IFusionCache _cache;
     private readonly IRemoteUserService _users;
+    private readonly IAuthContext _authContext;
     private readonly DatabaseContext _databaseContext;
 
-    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users)
+    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users, IAuthContext authContext)
     {
         _cache = cache;
         _users = users;
+        _authContext = authContext;
         _databaseContext = databaseContext;
     }
 
@@ -39,6 +41,27 @@ public class UserService : IUserService
             return cachedUser;
 
         var dbUser = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+
+        if (dbUser is null)
+            return null;
+
+        await UpsertCacheAsync(dbUser);
+        return dbUser;
+    }
+
+    public async Task<User?> GetSelfAsync()
+    {
+        if (!_authContext.HasUser())
+            return null;
+
+        var currentUser = _authContext.GetUser();
+
+        var cachedUser = await _cache.GetOrDefaultAsync<User>(GetKey(currentUser.Id));
+
+        if (cachedUser is not null)
+            return cachedUser;
+
+        var dbUser = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == currentUser.Id);
 
         if (dbUser is null)
             return null;
