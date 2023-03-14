@@ -113,16 +113,18 @@ public class UserService : IUserService
         if (authUser.Roles.Contains("kfn-admin"))
             userRoles.AddRange(new []{Roles.SuperAdmin, Roles.SystemAdmin});
 
+        var newUserId = Guid.NewGuid();
+
         var newUser = new User
         {
             Roles = userRoles,
-            Id = Guid.NewGuid(),
+            Id = newUserId,
             IdentityId = authUser.UserId,
             Email = authUser.Email,
             FirstName = authUser.Name,
             LastName = authUser.Nickname,
+            CreatedBy = newUserId,
             CreatedAt = authUser.CreatedAt,
-            UpdatedAt = authUser.UpdatedAt,
             Providers = authUser.Identities.Select(i => i.Provider).ToList()
         };
 
