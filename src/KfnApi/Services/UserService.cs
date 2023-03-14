@@ -1,7 +1,11 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.Helpers.Authorization;
 using KfnApi.Helpers.Database;
+using KfnApi.Helpers.Extensions;
+using KfnApi.Models.Common;
 using KfnApi.Models.Entities;
+using KfnApi.Models.Enums;
+using KfnApi.Models.Requests;
 using Microsoft.EntityFrameworkCore;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -9,6 +13,13 @@ namespace KfnApi.Services;
 
 public class UserService : IUserService
 {
+    private static readonly Dictionary<SortBy, ISortBy> SortFunctions = new ()
+        {
+            { SortBy.DateCreated, new SortBy<User, DateTime>(x => x.CreatedAt) },
+            { SortBy.FirstName, new SortBy<User, string>(x => x.FirstName) },
+            { SortBy.LastName, new SortBy<User, string>(x => x.LastName) }
+        };
+
     private readonly IFusionCache _cache;
     private readonly IRemoteUserService _users;
     private readonly DatabaseContext _databaseContext;
@@ -36,10 +47,19 @@ public class UserService : IUserService
         return dbUser;
     }
 
-    public async Task<List<User>> GetAllUsersAsync()
+    public async Task<PaginatedList<User>> GetAllUsersAsync(GetAllUsersRequest request)
     {
-        var users = await _databaseContext.Users.ToListAsync();
-        return users;
+        var users = _databaseContext.Users
+            .Where(user => request.SearchByEmail == null || user.Email.ToLower().Contains(request.SearchByEmail!.Trim().ToLower()))
+            .AsQueryable();
+
+        users = request.SortDirection == SortDirection.Descending
+            ? users.SortByDescending(SortFunctions[request.SortBy])
+            : users.SortBy(SortFunctions[request.SortBy]);
+
+        var paginated = await PaginatedList<User>.CreateAsync(users, request.PageIndex, request.PageSize);
+
+        return paginated;
     }
 
     public async Task<User?> EnrollUserAsync(string id)

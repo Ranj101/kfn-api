@@ -1,4 +1,6 @@
 using KfnApi.Abstractions;
+using KfnApi.Helpers.Extensions;
+using KfnApi.Models.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,9 +19,46 @@ public class UsersController : ControllerBase
         _service = service;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAllUsersAsync()
+    [HttpGet("self")]
+    public async Task<IActionResult> GetSelfAsync()
     {
-        return Ok(await _service.GetAllUsersAsync());
+        throw new NotImplementedException();
+    }
+
+    [HttpPatch("self")]
+    public async Task<ActionResult> UpdateSelfAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpGet("profiles")]
+    public async Task<IActionResult> GetProfilesAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpGet("profiles/{id}")]
+    public async Task<IActionResult> GetProfileAsync(string id)
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetUsersAsync([FromQuery] GetAllUsersRequest request)
+    {
+        var paginated = await _service.GetAllUsersAsync(request);
+        return Ok(paginated.ToPaginatedResponse(paginated.ToList()));
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetUserAsync(string id)
+    {
+        throw new NotImplementedException();
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUserAsync(string id)
+    {
+        throw new NotImplementedException();
     }
 }
