@@ -14,12 +14,9 @@ public sealed record Order : IAuditable
     public required string State { get; set; }
 
     public required Guid CreatedBy { get; init; }
-    public Guid? CancelledBy { get; set; }
     public Guid? UpdatedBy { get; set; }
     public required DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; set; }
-    public DateTime? ApprovedAt { get; set; }
-    public DateTime? CancelledAt { get; set; }
 
     public required double TotalPrice { get; set; }
     public required string Location { get; set; }
