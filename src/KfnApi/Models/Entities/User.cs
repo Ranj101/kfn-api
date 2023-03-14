@@ -19,5 +19,6 @@ public sealed record User : IAuditable
     public DateTime? UpdatedAt { get; set; }
 
     public Producer Producer { get; set; }
+    public ProducerApprovalForm ProducerApprovalForm { get; set; }
     public List<Order> Orders { get; set; }
 }

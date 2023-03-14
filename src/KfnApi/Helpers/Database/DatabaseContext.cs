@@ -15,6 +15,7 @@ public class DatabaseContext : DbContext
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<PriceByWeight> Prices => Set<PriceByWeight>();
+    public DbSet<ProducerApprovalForm> ProducerApprovalForms => Set<ProducerApprovalForm>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +33,10 @@ public class DatabaseContext : DbContext
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
         modelBuilder.Entity<Order>()
+            .Property(x => x.CreatedAt)
+            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+        modelBuilder.Entity<ProducerApprovalForm>()
             .Property(x => x.CreatedAt)
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
     }
