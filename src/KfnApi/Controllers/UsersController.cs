@@ -44,8 +44,8 @@ public class UsersController : ControllerBase
         return Ok(paginated.ToPaginatedResponse(profiles));
     }
 
-    [HttpGet("profiles/{id}")]
-    public async Task<IActionResult> GetProfileAsync(string id)
+    [HttpGet("profiles/{id:guid}")]
+    public async Task<IActionResult> GetProfileAsync(Guid id)
     {
         var user = await _service.GetByIdAsync(id);
 
@@ -62,8 +62,8 @@ public class UsersController : ControllerBase
         return Ok(paginated.ToPaginatedResponse(paginated.ToList()));
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetUserAsync(string id)
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetUserAsync(Guid id)
     {
         var user = await _service.GetByIdAsync(id);
 
@@ -73,8 +73,8 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUserAsync(string id)
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateUserAsync(Guid id)
     {
         throw new NotImplementedException();
     }

@@ -44,7 +44,7 @@ public class UserAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
         if (string.IsNullOrEmpty(userSub))
             return AuthenticateResult.NoResult();
 
-        var user = await _userService.GetByIdAsync(userSub) ?? await _userService.EnrollUserAsync(userSub);
+        var user = await _userService.GetByIdentityIdAsync(userSub) ?? await _userService.EnrollUserAsync(userSub);
 
         if(user is null)
             return AuthenticateResult.Fail(new AuthException("User identity not found."));
@@ -60,7 +60,7 @@ public class UserAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
     {
         var claims = new List<Claim>
         {
-            new (ClaimTypes.NameIdentifier, user.Id)
+            new (ClaimTypes.NameIdentifier, user.Id.ToString())
         };
 
         claims.AddRange(user.Roles.Select(role

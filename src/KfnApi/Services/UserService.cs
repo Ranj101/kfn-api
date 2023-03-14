@@ -33,9 +33,25 @@ public class UserService : IUserService
         _databaseContext = databaseContext;
     }
 
-    public async Task<User?> GetByIdAsync(string id)
+    public async Task<User?> GetByIdentityIdAsync(string id)
     {
         var cachedUser = await _cache.GetOrDefaultAsync<User>(GetKey(id));
+
+        if (cachedUser is not null)
+            return cachedUser;
+
+        var dbUser = await _databaseContext.Users.FirstOrDefaultAsync(u => u.IdentityId == id);
+
+        if (dbUser is null)
+            return null;
+
+        await UpsertCacheAsync(dbUser);
+        return dbUser;
+    }
+
+    public async Task<User?> GetByIdAsync(Guid id)
+    {
+        var cachedUser = await _cache.GetOrDefaultAsync<User>(GetKey(id.ToString()));
 
         if (cachedUser is not null)
             return cachedUser;
@@ -56,7 +72,7 @@ public class UserService : IUserService
 
         var currentUser = _authContext.GetUser();
 
-        var cachedUser = await _cache.GetOrDefaultAsync<User>(GetKey(currentUser.Id));
+        var cachedUser = await _cache.GetOrDefaultAsync<User>(GetKey(currentUser.IdentityId));
 
         if (cachedUser is not null)
             return cachedUser;
@@ -100,7 +116,8 @@ public class UserService : IUserService
         var newUser = new User
         {
             Roles = userRoles,
-            Id = authUser.UserId,
+            Id = Guid.NewGuid(),
+            IdentityId = authUser.UserId,
             Email = authUser.Email,
             FirstName = authUser.Name,
             LastName = authUser.Nickname,
@@ -118,9 +135,13 @@ public class UserService : IUserService
 
     public async Task UpsertCacheAsync(User user)
     {
-        var cachedUser = await _cache.TryGetAsync<User>(GetKey(user.Id));
+        var cachedUser = await _cache.TryGetAsync<User>(GetKey(user.IdentityId));
         if (!cachedUser.HasValue)
-            await _cache.SetAsync(GetKey(user.Id), user);
+            await _cache.SetAsync(GetKey(user.IdentityId), user);
+
+        cachedUser = await _cache.TryGetAsync<User>(GetKey(user.Id.ToString()));
+        if (!cachedUser.HasValue)
+            await _cache.SetAsync(GetKey(user.Id.ToString()), user);
     }
 
     private static string GetKey(in string id)
