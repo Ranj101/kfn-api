@@ -4,7 +4,7 @@ using KfnApi.Models.Enums.Workflows;
 
 namespace KfnApi.Models.Entities;
 
-public sealed record Producer : IAuditable
+public sealed record Producer : IAuditable, IStateful<ProducerState>
 {
     public required Guid Id { get; set; }
     [ForeignKey(nameof(User))]

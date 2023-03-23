@@ -5,6 +5,7 @@ using KfnApi.Helpers.Extensions;
 using KfnApi.Models.Common;
 using KfnApi.Models.Entities;
 using KfnApi.Models.Enums;
+using KfnApi.Models.Enums.Workflows;
 using KfnApi.Models.Requests;
 using Microsoft.EntityFrameworkCore;
 using ZiggyCreatures.Caching.Fusion;
@@ -123,6 +124,7 @@ public class UserService : IUserService
             Email = authUser.Email,
             FirstName = authUser.Name,
             LastName = authUser.Nickname,
+            State = UserState.Active,
             CreatedBy = newUserId,
             CreatedAt = authUser.CreatedAt,
             Providers = authUser.Identities.Select(i => i.Provider).ToList()

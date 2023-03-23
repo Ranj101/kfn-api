@@ -1,9 +1,9 @@
 ﻿using KfnApi.Abstractions;
-using KfnApi.Models.Enums.Workflow;
+using KfnApi.Models.Enums.Workflows;
 
 namespace KfnApi.Models.Entities;
 
-public sealed record User : IAuditable
+public sealed record User : IAuditable, IStateful<UserState>
 {
     public required Guid Id { get; set; }
     public required string IdentityId { get; set; }
