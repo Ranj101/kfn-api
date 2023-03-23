@@ -13,6 +13,7 @@ public partial class StartupConfigurations
         services.AddScoped<IRemoteUserService, RemoteUserService>();
         services.AddScoped<IPermissionService, PermissionService>();
 
+        services.AddSingleton<WorkflowContext>();
         services.AddSingleton<IRoleMap, RoleMap>();
 
         return services;
