@@ -31,6 +31,7 @@ services.AddControllers();
 services.AddEndpointsApiExplorer();
 
 services.ConfigureSwagger()
+        .ConfigureControllers()
         .ConfigureDependencies()
         .ConfigureAuthorization();
 
