@@ -10,5 +10,6 @@ public sealed record PriceByWeight
     public required double Value { get; set; }
     public required double Weight { get; set; }
 
+    // Database Relations
     public Product Product { get; set; }
 }
