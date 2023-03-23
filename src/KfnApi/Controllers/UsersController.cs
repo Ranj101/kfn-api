@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KfnApi.Controllers;
 
-
 [Authorize]
 [ApiController]
 [Route("v1/users")]
@@ -17,23 +16,6 @@ public class UsersController : ControllerBase
     public UsersController(IUserService service)
     {
         _service = service;
-    }
-
-    [HttpGet("self")]
-    public async Task<IActionResult> GetSelfAsync()
-    {
-        var user = await _service.GetSelfAsync();
-
-        if (user is null)
-            return NotFound();
-
-        return Ok(user.ToProfileResponse());
-    }
-
-    [HttpPatch("self")]
-    public async Task<ActionResult> UpdateSelfAsync()
-    {
-        throw new NotImplementedException();
     }
 
     [HttpGet("profiles")]
@@ -78,4 +60,12 @@ public class UsersController : ControllerBase
     {
         throw new NotImplementedException();
     }
+
+    [HttpPost("{id:guid}")]
+    public async Task<IActionResult> SubmitAbuseReportAsync(Guid id, string abuseReport)
+    {
+        throw new NotImplementedException();
+    }
+
+    // Block/Unblock user account
 }
