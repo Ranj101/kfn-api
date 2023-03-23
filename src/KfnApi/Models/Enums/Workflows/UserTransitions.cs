@@ -1,4 +1,4 @@
-﻿namespace KfnApi.Models.Enums.Workflow;
+﻿namespace KfnApi.Models.Enums.Workflows;
 
 public enum UserTrigger
 {

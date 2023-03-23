@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using KfnApi.Abstractions;
-using KfnApi.Models.Enums.Workflow;
+using KfnApi.Models.Enums.Workflows;
 
 namespace KfnApi.Models.Entities;
 
