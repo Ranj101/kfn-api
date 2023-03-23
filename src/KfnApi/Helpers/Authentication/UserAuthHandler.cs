@@ -3,6 +3,7 @@ using System.Text.Encodings.Web;
 using KfnApi.Abstractions;
 using KfnApi.Errors.Exceptions;
 using KfnApi.Models.Entities;
+using KfnApi.Models.Enums.Workflows;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
@@ -48,6 +49,9 @@ public class UserAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
         if(user is null)
             return AuthenticateResult.Fail(new AuthException("User identity not found."));
+
+        if(user.State == UserState.Inactive)
+            return AuthenticateResult.Fail(new AuthException("User is blocked."));
 
         _authContext.SetUser(user);
 
