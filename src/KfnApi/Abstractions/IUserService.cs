@@ -8,9 +8,7 @@ public interface IUserService
 {
     Task<User?> GetByIdentityIdAsync(string id);
     Task<User?> GetByIdAsync(Guid id);
-    Task<User?> GetSelfAsync();
     Task<PaginatedList<User>> GetAllUsersAsync(GetAllUsersRequest request);
     Task<User?> EnrollUserAsync(string id);
     Task<Result<User>> UpdateUserState(Guid id, UpdateUserStateRequest request);
-    Task UpsertCacheAsync(User user);
 }

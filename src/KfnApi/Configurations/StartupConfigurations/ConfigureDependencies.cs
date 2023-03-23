@@ -8,6 +8,7 @@ public partial class StartupConfigurations
 {
     public static IServiceCollection ConfigureDependencies(this IServiceCollection services)
     {
+        services.AddScoped<ISelfService, SelfService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthContext, AuthContext>();
         services.AddScoped<IRemoteUserService, RemoteUserService>();

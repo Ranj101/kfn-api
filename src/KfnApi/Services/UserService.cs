@@ -23,15 +23,13 @@ public class UserService : IUserService
 
     private readonly IFusionCache _cache;
     private readonly IRemoteUserService _users;
-    private readonly IAuthContext _authContext;
     private readonly WorkflowContext _workflowContext;
     private readonly DatabaseContext _databaseContext;
 
-    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users, IAuthContext authContext, WorkflowContext workflowContext)
+    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users, WorkflowContext workflowContext)
     {
         _cache = cache;
         _users = users;
-        _authContext = authContext;
         _workflowContext = workflowContext;
         _databaseContext = databaseContext;
     }
@@ -60,27 +58,6 @@ public class UserService : IUserService
             return cachedUser;
 
         var dbUser = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == id);
-
-        if (dbUser is null)
-            return null;
-
-        await UpsertCacheAsync(dbUser);
-        return dbUser;
-    }
-
-    public async Task<User?> GetSelfAsync()
-    {
-        if (!_authContext.HasUser())
-            return null;
-
-        var currentUser = _authContext.GetUser();
-
-        var cachedUser = await _cache.GetOrDefaultAsync<User>(GetKey(currentUser.IdentityId));
-
-        if (cachedUser is not null)
-            return cachedUser;
-
-        var dbUser = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == currentUser.Id);
 
         if (dbUser is null)
             return null;
@@ -152,6 +129,7 @@ public class UserService : IUserService
 
         if (request.Trigger == UserTrigger.Deactivate)
         {
+            //TODO: Block user at Auth0 level
             if (!_workflowContext.UserWorkflow.DeactivateUser(user))
                 return Result<User>.FailureResult(new Error
                 {
@@ -160,6 +138,7 @@ public class UserService : IUserService
                 });
 
             await _databaseContext.SaveChangesAsync();
+            await RemoveCacheAsync(user);
             return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
         }
 
@@ -171,18 +150,20 @@ public class UserService : IUserService
             });
 
         await _databaseContext.SaveChangesAsync();
+        await RemoveCacheAsync(user);
         return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
     }
 
-    public async Task UpsertCacheAsync(User user)
+    private async Task UpsertCacheAsync(User user)
     {
-        var cachedUser = await _cache.TryGetAsync<User>(GetKey(user.IdentityId));
-        if (!cachedUser.HasValue)
-            await _cache.SetAsync(GetKey(user.IdentityId), user);
+        await _cache.SetAsync(GetKey(user.IdentityId), user);
+        await _cache.SetAsync(GetKey(user.Id.ToString()), user);
+    }
 
-        cachedUser = await _cache.TryGetAsync<User>(GetKey(user.Id.ToString()));
-        if (!cachedUser.HasValue)
-            await _cache.SetAsync(GetKey(user.Id.ToString()), user);
+    private async Task RemoveCacheAsync(User user)
+    {
+        await _cache.RemoveAsync(GetKey(user.IdentityId));
+        await _cache.RemoveAsync(GetKey(user.Id.ToString()));
     }
 
     private static string GetKey(in string id)

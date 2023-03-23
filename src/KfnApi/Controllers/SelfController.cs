@@ -10,9 +10,9 @@ namespace KfnApi.Controllers;
 [Route("v1/self")]
 public class SelfController : ControllerBase
 {
-    private readonly IUserService _service;
+    private readonly ISelfService _service;
 
-    public SelfController(IUserService service)
+    public SelfController(ISelfService service)
     {
         _service = service;
     }
