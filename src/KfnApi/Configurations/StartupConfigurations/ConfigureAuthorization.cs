@@ -1,5 +1,7 @@
+using KfnApi.Helpers.Authentication;
 using KfnApi.Helpers.Authorization.Policy;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Policy;
 
 namespace KfnApi.Configurations.StartupConfigurations;
 
@@ -11,7 +13,8 @@ public static partial class StartupConfigurations
 
         service.AddSingleton<IAuthorizationPolicyProvider, PolicyProvider>()
                .AddSingleton<IAuthorizationMiddlewareResultHandler, AuthorizationResultHandler>()
-               .AddScoped<IAuthorizationHandler, AuthorizationRequirementHandler>();
+               .AddScoped<IAuthorizationHandler, AuthorizationRequirementHandler>()
+               .AddTransient<IPolicyEvaluator, UserPolicyEvaluator>();
 
         return service;
     }
