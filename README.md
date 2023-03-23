@@ -60,9 +60,10 @@ The api comes with preconfigured settings but it can be edited in the [appsettin
 Configurations can be overridden for different environments using _appsettings.ENV_NAME.json_.<br />
 for example: [appsettings.Development.json](src/PilgrimageSettingsApi/appsettings.Development.json).
 
-| Key  | Type                        | Description         |
-|------|-----------------------------|---------------------|
-| Name | [NameOptions](src/KfnApi)   | Name configuration. |
+| Key      | Type                                                             | Description                        |
+|----------|------------------------------------------------------------------|------------------------------------|
+| Postgres | [PostgresOptions](src/KfnApi/Models/Settings/PostgresOptions.cs) | PostgreSQL database configuration. |
+| Redis    | [RedisOptions](src/KfnApi/Models/Settings/RedisOptions.cs)       | Redis cache configuration.         |
 
 ### Contributing
 
