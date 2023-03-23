@@ -32,17 +32,17 @@ public class UsersController : KfnControllerBase
     {
         var user = await _service.GetByIdAsync(id);
 
-        if (user is null)
-            return NotFound();
-
-        return Ok(user.ToProfileResponse());
+        return user is null
+            ? NotFoundResponse()
+            : Ok(user.ToProfileResponse());
     }
 
     [HttpGet]
     public async Task<IActionResult> GetUsersAsync([FromQuery] GetAllUsersRequest request)
     {
         var paginated = await _service.GetAllUsersAsync(request);
-        return Ok(paginated.ToPaginatedResponse(paginated.ToList()));
+        var users = paginated.Select(user => user.ToUserResponse()).ToList();
+        return Ok(paginated.ToPaginatedResponse(users));
     }
 
     [HttpGet("{id:guid}")]
@@ -50,10 +50,9 @@ public class UsersController : KfnControllerBase
     {
         var user = await _service.GetByIdAsync(id);
 
-        if (user is null)
-            return NotFound();
-
-        return Ok(user);
+        return user is null
+            ? NotFoundResponse()
+            : Ok(user.ToUserResponse());
     }
 
     [HttpPatch("{id:guid}")]
@@ -62,8 +61,8 @@ public class UsersController : KfnControllerBase
         var result = await _service.UpdateUserState(id, request);
 
         return result.IsSuccess()
-            ? Success(result.Value, result.HttpCode)
-            : Failure(result.Error!);
+            ? SuccessResponse(result.Value, result.HttpCode)
+            : ErrorResponse(result.Error!);
     }
 
     [HttpPost("{id:guid}")]
@@ -71,6 +70,4 @@ public class UsersController : KfnControllerBase
     {
         throw new NotImplementedException();
     }
-
-    // Block/Unblock user account
 }

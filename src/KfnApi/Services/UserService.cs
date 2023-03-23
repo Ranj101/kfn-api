@@ -121,21 +121,13 @@ public class UserService : IUserService
         var user = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == id);
 
         if (user is null)
-            return Result<User>.FailureResult(new Error
-            {
-                HttpCode = StatusCodes.Status404NotFound,
-                Title = "User Not Found."
-            });
+            return Result<User>.NotFoundResult();
 
         if (request.Trigger == UserTrigger.Deactivate)
         {
             //TODO: Block user at Auth0 level
             if (!_workflowContext.UserWorkflow.DeactivateUser(user))
-                return Result<User>.FailureResult(new Error
-                {
-                    HttpCode = StatusCodes.Status422UnprocessableEntity,
-                    Title = "User state update not permitted."
-                });
+                return Result<User>.StateErrorResult();
 
             await _databaseContext.SaveChangesAsync();
             await RemoveCacheAsync(user);
@@ -143,11 +135,7 @@ public class UserService : IUserService
         }
 
         if (!_workflowContext.UserWorkflow.ReactivateUser(user))
-            return Result<User>.FailureResult(new Error
-            {
-                HttpCode = StatusCodes.Status422UnprocessableEntity,
-                Title = "User state update not permitted."
-            });
+            return Result<User>.StateErrorResult();
 
         await _databaseContext.SaveChangesAsync();
         await RemoveCacheAsync(user);

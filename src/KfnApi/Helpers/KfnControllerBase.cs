@@ -5,19 +5,33 @@ namespace KfnApi.Helpers;
 
 public class KfnControllerBase : ControllerBase
 {
-    protected IActionResult Failure(Error failure)
-    {
-        return new ObjectResult(failure)
-        {
-            StatusCode = failure.HttpCode
-        };
-    }
-
-    protected IActionResult Success(object? value, int httpCode)
+    protected IActionResult SuccessResponse(object? value, int httpCode)
     {
         return new ObjectResult(value)
         {
             StatusCode = httpCode
+        };
+    }
+
+    protected IActionResult ErrorResponse(Error error)
+    {
+        return new ObjectResult(error)
+        {
+            StatusCode = error.HttpCode
+        };
+    }
+
+    protected IActionResult NotFoundResponse()
+    {
+        var error = new Error
+        {
+            HttpCode = StatusCodes.Status404NotFound,
+            Title = "Resource Not Found"
+        };
+
+        return new ObjectResult(error)
+        {
+            StatusCode = error.HttpCode
         };
     }
 }
