@@ -24,13 +24,15 @@ public class UserService : IUserService
     private readonly IFusionCache _cache;
     private readonly IRemoteUserService _users;
     private readonly IAuthContext _authContext;
+    private readonly WorkflowContext _workflowContext;
     private readonly DatabaseContext _databaseContext;
 
-    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users, IAuthContext authContext)
+    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users, IAuthContext authContext, WorkflowContext workflowContext)
     {
         _cache = cache;
         _users = users;
         _authContext = authContext;
+        _workflowContext = workflowContext;
         _databaseContext = databaseContext;
     }
 
@@ -135,6 +137,41 @@ public class UserService : IUserService
 
         await UpsertCacheAsync(entry.Entity);
         return entry.Entity;
+    }
+
+    public async Task<Result<User>> UpdateUserState(Guid id, UpdateUserStateRequest request)
+    {
+        var user = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user is null)
+            return Result<User>.FailureResult(new Error
+            {
+                HttpCode = StatusCodes.Status404NotFound,
+                Title = "User Not Found."
+            });
+
+        if (request.Trigger == UserTrigger.Deactivate)
+        {
+            if (!_workflowContext.UserWorkflow.DeactivateUser(user))
+                return Result<User>.FailureResult(new Error
+                {
+                    HttpCode = StatusCodes.Status422UnprocessableEntity,
+                    Title = "User state update not permitted."
+                });
+
+            await _databaseContext.SaveChangesAsync();
+            return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
+        }
+
+        if (!_workflowContext.UserWorkflow.ReactivateUser(user))
+            return Result<User>.FailureResult(new Error
+            {
+                HttpCode = StatusCodes.Status422UnprocessableEntity,
+                Title = "User state update not permitted."
+            });
+
+        await _databaseContext.SaveChangesAsync();
+        return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
     }
 
     public async Task UpsertCacheAsync(User user)

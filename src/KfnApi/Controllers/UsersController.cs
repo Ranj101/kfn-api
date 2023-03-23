@@ -1,4 +1,5 @@
 using KfnApi.Abstractions;
+using KfnApi.Helpers;
 using KfnApi.Helpers.Extensions;
 using KfnApi.Models.Requests;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,7 @@ namespace KfnApi.Controllers;
 [Authorize]
 [ApiController]
 [Route("v1/users")]
-public class UsersController : ControllerBase
+public class UsersController : KfnControllerBase
 {
     private readonly IUserService _service;
 
@@ -55,10 +56,14 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
-    [HttpPut("{id:guid}")]
-    public async Task<IActionResult> UpdateUserAsync(Guid id)
+    [HttpPatch("{id:guid}")]
+    public async Task<IActionResult> UpdateUserStateAsync(Guid id, UpdateUserStateRequest request)
     {
-        throw new NotImplementedException();
+        var result = await _service.UpdateUserState(id, request);
+
+        return result.IsSuccess()
+            ? Success(result.Value, result.HttpCode)
+            : Failure(result.Error!);
     }
 
     [HttpPost("{id:guid}")]
