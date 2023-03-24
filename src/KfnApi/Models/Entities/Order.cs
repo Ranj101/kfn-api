@@ -22,7 +22,7 @@ public sealed record Order : IAuditable, IStateful<OrderState>
     public DateTime? UpdatedAt { get; set; }
 
     // Database Relations
-    public User User { get; set; }
-    public Producer Producer { get; set; }
-    public List<Product> Products { get; set; }
+    public User? User { get; set; }
+    public Producer? Producer { get; set; }
+    public List<Product>? Products { get; set; }
 }

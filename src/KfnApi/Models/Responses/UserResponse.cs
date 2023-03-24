@@ -11,7 +11,8 @@ public sealed record UserResponse
     public required string Email { get; set; }
     public List<string> Providers { get; set; } = new();
     public List<string> Roles { get; set; } = new();
-    public List<string> AbuseReports { get; set; } = new();
+    public ProducerPageResponse? ProducerPage { get; set; }
+    public List<BasicReportResponse> AbuseReports { get; set; } = new();
     public required UserState State { get; set; }
 
     public required Guid CreatedBy { get; init; }

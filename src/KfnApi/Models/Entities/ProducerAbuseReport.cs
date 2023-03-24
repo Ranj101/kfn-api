@@ -1,16 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using KfnApi.Abstractions;
-using KfnApi.Models.Enums.Workflows;
 
 namespace KfnApi.Models.Entities;
 
-public sealed record Product : IAuditable, IStateful<ProductState>
+public sealed record ProducerAbuseReport : IAbuseReport
 {
     public required Guid Id { get; set; }
     [ForeignKey(nameof(Producer))]
     public required Guid ProducerId { get; set; }
-    public required string Name { get; set; }
-    public required ProductState State { get; set; }
+    public required string Title { get; set; }
+    public required string Summary { get; set; }
 
     public required Guid CreatedBy { get; init; }
     public Guid? UpdatedBy { get; set; }
@@ -19,6 +18,4 @@ public sealed record Product : IAuditable, IStateful<ProductState>
 
     // Database Relations
     public Producer? Producer { get; set; }
-    public List<PriceByWeight>? Prices { get; set; }
-    public List<Order>? Orders { get; set; }
 }

@@ -12,7 +12,6 @@ public sealed record User : IAuditable, IStateful<UserState>
     public required string Email { get; set; }
     public List<string> Providers { get; set; } = new();
     public List<string> Roles { get; set; } = new();
-    public List<string> AbuseReports { get; set; } = new();
     public required UserState State { get; set; }
 
     public required Guid CreatedBy { get; init; }
@@ -21,7 +20,8 @@ public sealed record User : IAuditable, IStateful<UserState>
     public DateTime? UpdatedAt { get; set; }
 
     // Database Relations
-    public Producer Producer { get; set; }
-    public ProducerApprovalForm ProducerApprovalForm { get; set; }
-    public List<Order> Orders { get; set; }
+    public Producer? Producer { get; set; }
+    public List<Order>? Orders { get; set; }
+    public List<UserAbuseReport>? AbuseReports { get; set; }
+    public List<ProducerApprovalForm>? ProducerApprovalForms { get; set; }
 }

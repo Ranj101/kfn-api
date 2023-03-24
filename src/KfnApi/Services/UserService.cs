@@ -41,7 +41,10 @@ public class UserService : IUserService
         if (cachedUser is not null)
             return cachedUser;
 
-        var dbUser = await _databaseContext.Users.FirstOrDefaultAsync(u => u.IdentityId == id);
+        var dbUser = await _databaseContext.Users
+            .Include(u => u.Producer)
+            .Include(u => u.AbuseReports)
+            .FirstOrDefaultAsync(u => u.IdentityId == id);
 
         if (dbUser is null)
             return null;
@@ -52,23 +55,19 @@ public class UserService : IUserService
 
     public async Task<User?> GetByIdAsync(Guid id)
     {
-        var cachedUser = await _cache.GetOrDefaultAsync<User>(GetKey(id.ToString()));
+        var dbUser = await _databaseContext.Users
+            .Include(u => u.Producer)
+            .Include(u => u.AbuseReports)
+            .FirstOrDefaultAsync(u => u.Id == id);
 
-        if (cachedUser is not null)
-            return cachedUser;
-
-        var dbUser = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == id);
-
-        if (dbUser is null)
-            return null;
-
-        await UpsertCacheAsync(dbUser);
-        return dbUser;
+        return dbUser ?? null;
     }
 
     public async Task<PaginatedList<User>> GetAllUsersAsync(GetAllUsersRequest request)
     {
         var users = _databaseContext.Users
+            .Include(u => u.Producer)
+            .Include(u => u.AbuseReports)
             .Where(user => request.SearchByEmail == null || user.Email.ToLower().Contains(request.SearchByEmail!.Trim().ToLower()))
             .AsQueryable();
 
@@ -106,6 +105,7 @@ public class UserService : IUserService
             State = UserState.Active,
             CreatedBy = newUserId,
             CreatedAt = authUser.CreatedAt,
+            AbuseReports = new List<UserAbuseReport>(),
             Providers = authUser.Identities.Select(i => i.Provider).ToList()
         };
 
@@ -144,6 +144,9 @@ public class UserService : IUserService
 
     private async Task UpsertCacheAsync(User user)
     {
+        if(user.AbuseReports is null)
+            throw new ArgumentException("null parameter caching", nameof(user.AbuseReports));
+
         await _cache.SetAsync(GetKey(user.IdentityId), user);
         await _cache.SetAsync(GetKey(user.Id.ToString()), user);
     }

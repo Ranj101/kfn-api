@@ -1,4 +1,5 @@
-﻿using KfnApi.Models.Common;
+﻿using KfnApi.Abstractions;
+using KfnApi.Models.Common;
 using KfnApi.Models.Entities;
 using KfnApi.Models.Responses;
 
@@ -13,6 +14,9 @@ public static class Mappers
 
     public static UserResponse ToUserResponse(this User user)
     {
+        if(user.AbuseReports is null)
+            throw new ArgumentException("null parameter mapping", nameof(user.AbuseReports));
+
         return new UserResponse
         {
             Id = user.Id,
@@ -27,7 +31,8 @@ public static class Mappers
             CreatedAt = user.CreatedAt,
             UpdatedAt = user.UpdatedAt,
             IdentityId = user.IdentityId,
-            AbuseReports = user.AbuseReports
+            ProducerPage = user.Producer?.ToProducerPageResponse(),
+            AbuseReports = user.AbuseReports.Select(x => x.ToBasicReportResponse()).ToList()
         };
     }
 
@@ -41,6 +46,31 @@ public static class Mappers
             LastName = user.LastName,
             CreatedAt = user.CreatedAt,
             Providers = user.Providers
+        };
+    }
+
+    public static BasicReportResponse ToBasicReportResponse<T>(this T report) where T : IAbuseReport
+    {
+        return new BasicReportResponse
+        {
+            Id = report.Id,
+            Title = report.Title,
+            Summary = report.Summary,
+            CreatedAt = report.CreatedAt
+        };
+    }
+
+    public static ProducerPageResponse ToProducerPageResponse(this Producer producer)
+    {
+        return new ProducerPageResponse
+        {
+            Id = producer.Id,
+            Name = producer.Name,
+            Reviews = producer.Reviews,
+            Locations = producer.Locations,
+            CreatedAt = producer.CreatedAt,
+            OpeningTime = producer.OpeningTime,
+            ClosingTime = producer.ClosingTime
         };
     }
 }

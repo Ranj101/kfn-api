@@ -64,10 +64,4 @@ public class UsersController : KfnControllerBase
             ? SuccessResponse(result.Value, result.HttpCode)
             : ErrorResponse(result.Error!);
     }
-
-    [HttpPost("{id:guid}")]
-    public async Task<IActionResult> SubmitAbuseReportAsync(Guid id, string abuseReport)
-    {
-        throw new NotImplementedException();
-    }
 }
