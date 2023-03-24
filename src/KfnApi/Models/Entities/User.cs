@@ -22,6 +22,6 @@ public sealed record User : IAuditable, IStateful<UserState>
     // Database Relations
     public Producer? Producer { get; set; }
     public List<Order>? Orders { get; set; }
-    public List<UserAbuseReport>? AbuseReports { get; set; }
+    public List<UserReport>? AbuseReports { get; set; }
     public List<ProducerApprovalForm>? ProducerApprovalForms { get; set; }
 }

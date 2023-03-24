@@ -2,7 +2,7 @@
 
 namespace KfnApi.Models.Requests;
 
-public class SubmitAbuseReportRequest
+public sealed record SubmitReportRequest
 {
     [Required]
     [MaxLength(350)]

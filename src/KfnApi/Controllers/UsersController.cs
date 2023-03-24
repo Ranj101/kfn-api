@@ -41,7 +41,7 @@ public class UsersController : KfnControllerBase
     public async Task<IActionResult> GetUsersAsync([FromQuery] GetAllUsersRequest request)
     {
         var paginated = await _service.GetAllUsersAsync(request);
-        var users = paginated.Select(user => user.ToUserResponse()).ToList();
+        var users = paginated.Select(user => user.ToUserListResponse()).ToList();
         return Ok(paginated.ToPaginatedResponse(users));
     }
 
@@ -61,7 +61,7 @@ public class UsersController : KfnControllerBase
         var result = await _service.UpdateUserState(id, request);
 
         return result.IsSuccess()
-            ? SuccessResponse(result.Value, result.HttpCode)
+            ? SuccessResponse(result.Value!.ToUserListResponse(), result.HttpCode)
             : ErrorResponse(result.Error!);
     }
 }

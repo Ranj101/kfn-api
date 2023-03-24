@@ -1,6 +1,6 @@
 ﻿namespace KfnApi.Models.Responses;
 
-public class ProducerPageResponse
+public sealed record ProducerPageResponse
 {
     public required Guid Id { get; set; }
     public required string Name { get; set; }

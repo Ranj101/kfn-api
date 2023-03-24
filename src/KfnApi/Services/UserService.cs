@@ -15,21 +15,24 @@ namespace KfnApi.Services;
 public class UserService : IUserService
 {
     private static readonly Dictionary<SortBy, ISortBy> SortFunctions = new ()
-        {
-            { SortBy.DateCreated, new SortBy<User, DateTime>(x => x.CreatedAt) },
-            { SortBy.FirstName, new SortBy<User, string>(x => x.FirstName) },
-            { SortBy.LastName, new SortBy<User, string>(x => x.LastName) }
-        };
+    {
+        { SortBy.DateCreated, new SortBy<User, DateTime>(x => x.CreatedAt) },
+        { SortBy.FirstName, new SortBy<User, string>(x => x.FirstName) },
+        { SortBy.LastName, new SortBy<User, string>(x => x.LastName) }
+    };
 
     private readonly IFusionCache _cache;
     private readonly IRemoteUserService _users;
+    private readonly IAuthContext _authContext;
     private readonly WorkflowContext _workflowContext;
     private readonly DatabaseContext _databaseContext;
 
-    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users, WorkflowContext workflowContext)
+    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users, WorkflowContext workflowContext,
+        IAuthContext authContext)
     {
         _cache = cache;
         _users = users;
+        _authContext = authContext;
         _workflowContext = workflowContext;
         _databaseContext = databaseContext;
     }
@@ -41,10 +44,7 @@ public class UserService : IUserService
         if (cachedUser is not null)
             return cachedUser;
 
-        var dbUser = await _databaseContext.Users
-            .Include(u => u.Producer)
-            .Include(u => u.AbuseReports)
-            .FirstOrDefaultAsync(u => u.IdentityId == id);
+        var dbUser = await _databaseContext.Users.FirstOrDefaultAsync(u => u.IdentityId == id);
 
         if (dbUser is null)
             return null;
@@ -55,12 +55,10 @@ public class UserService : IUserService
 
     public async Task<User?> GetByIdAsync(Guid id)
     {
-        var dbUser = await _databaseContext.Users
+        return await _databaseContext.Users
             .Include(u => u.Producer)
             .Include(u => u.AbuseReports)
             .FirstOrDefaultAsync(u => u.Id == id);
-
-        return dbUser ?? null;
     }
 
     public async Task<PaginatedList<User>> GetAllUsersAsync(GetAllUsersRequest request)
@@ -105,7 +103,6 @@ public class UserService : IUserService
             State = UserState.Active,
             CreatedBy = newUserId,
             CreatedAt = authUser.CreatedAt,
-            AbuseReports = new List<UserAbuseReport>(),
             Providers = authUser.Identities.Select(i => i.Provider).ToList()
         };
 
@@ -129,6 +126,7 @@ public class UserService : IUserService
             if (!_workflowContext.UserWorkflow.DeactivateUser(user))
                 return Result<User>.StateErrorResult();
 
+            user.UpdatedBy = _authContext.GetUserId();
             await _databaseContext.SaveChangesAsync();
             await RemoveCacheAsync(user);
             return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
@@ -137,6 +135,7 @@ public class UserService : IUserService
         if (!_workflowContext.UserWorkflow.ReactivateUser(user))
             return Result<User>.StateErrorResult();
 
+        user.UpdatedBy = _authContext.GetUserId();
         await _databaseContext.SaveChangesAsync();
         await RemoveCacheAsync(user);
         return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
@@ -144,17 +143,12 @@ public class UserService : IUserService
 
     private async Task UpsertCacheAsync(User user)
     {
-        if(user.AbuseReports is null)
-            throw new ArgumentException("null parameter caching", nameof(user.AbuseReports));
-
         await _cache.SetAsync(GetKey(user.IdentityId), user);
-        await _cache.SetAsync(GetKey(user.Id.ToString()), user);
     }
 
     private async Task RemoveCacheAsync(User user)
     {
         await _cache.RemoveAsync(GetKey(user.IdentityId));
-        await _cache.RemoveAsync(GetKey(user.Id.ToString()));
     }
 
     private static string GetKey(in string id)

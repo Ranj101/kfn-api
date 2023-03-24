@@ -1,6 +1,6 @@
 ﻿namespace KfnApi.Abstractions;
 
-public interface IAbuseReport : IAuditable
+public interface IReport : IAuditable
 {
     Guid Id { get; set; }
     string Title { get; set; }

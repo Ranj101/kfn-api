@@ -32,7 +32,26 @@ public static class Mappers
             UpdatedAt = user.UpdatedAt,
             IdentityId = user.IdentityId,
             ProducerPage = user.Producer?.ToProducerPageResponse(),
-            AbuseReports = user.AbuseReports.Select(x => x.ToBasicReportResponse()).ToList()
+            AbuseReports = user.AbuseReports.Select(x => x.ToReportResponse()).ToList()
+        };
+    }
+
+    public static UserListResponse ToUserListResponse(this User user)
+    {
+        return new UserListResponse
+        {
+            Id = user.Id,
+            Email = user.Email,
+            Roles = user.Roles,
+            State = user.State,
+            LastName = user.LastName,
+            FirstName = user.FirstName,
+            Providers = user.Providers,
+            CreatedBy = user.CreatedBy,
+            UpdatedBy = user.UpdatedBy,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt,
+            IdentityId = user.IdentityId
         };
     }
 
@@ -49,14 +68,21 @@ public static class Mappers
         };
     }
 
-    public static BasicReportResponse ToBasicReportResponse<T>(this T report) where T : IAbuseReport
+    public static SelfResponse ToSelfResponse(this User user)
     {
-        return new BasicReportResponse
+        return new SelfResponse
         {
-            Id = report.Id,
-            Title = report.Title,
-            Summary = report.Summary,
-            CreatedAt = report.CreatedAt
+            Id = user.Id,
+            Email = user.Email,
+            Roles = user.Roles,
+            LastName = user.LastName,
+            FirstName = user.FirstName,
+            Providers = user.Providers,
+            CreatedBy = user.CreatedBy,
+            UpdatedBy = user.UpdatedBy,
+            CreatedAt = user.CreatedAt,
+            UpdatedAt = user.UpdatedAt,
+            ProducerPage = user.Producer?.ToProducerPageResponse()
         };
     }
 
@@ -71,6 +97,56 @@ public static class Mappers
             CreatedAt = producer.CreatedAt,
             OpeningTime = producer.OpeningTime,
             ClosingTime = producer.ClosingTime
+        };
+    }
+
+    public static ReportResponse ToReportResponse<T>(this T report) where T : IReport
+    {
+        return new ReportResponse
+        {
+            Id = report.Id,
+            Title = report.Title,
+            Summary = report.Summary,
+            CreatedBy = report.CreatedBy,
+            CreatedAt = report.CreatedAt,
+            UpdatedBy = report.UpdatedBy,
+            UpdatedAt = report.UpdatedAt
+        };
+    }
+
+    public static UserReportResponse ToUserReportResponse(this UserReport report)
+    {
+        if(report.User is null)
+            throw new ArgumentException("null parameter mapping", nameof(report.User));
+
+        return new UserReportResponse
+        {
+            Id = report.Id,
+            Title = report.Title,
+            Summary = report.Summary,
+            CreatedBy = report.CreatedBy,
+            CreatedAt = report.CreatedAt,
+            UpdatedBy = report.UpdatedBy,
+            UpdatedAt = report.UpdatedAt,
+            User = report.User.ToProfileResponse()
+        };
+    }
+
+    public static ProducerReportResponse ToProducerReportResponse(this ProducerReport report)
+    {
+        if(report.Producer is null)
+            throw new ArgumentException("null parameter mapping", nameof(report.Producer));
+
+        return new ProducerReportResponse
+        {
+            Id = report.Id,
+            Title = report.Title,
+            Summary = report.Summary,
+            CreatedBy = report.CreatedBy,
+            CreatedAt = report.CreatedAt,
+            UpdatedBy = report.UpdatedBy,
+            UpdatedAt = report.UpdatedAt,
+            Producer = report.Producer.ToProducerPageResponse()
         };
     }
 }

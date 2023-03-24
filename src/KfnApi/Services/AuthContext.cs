@@ -24,6 +24,9 @@ public class AuthContext : IAuthContext
     public User GetUser()
         => _user!;
 
+    public Guid GetUserId()
+        => _user!.Id;
+
     public bool IsAdmin()
         => _isSuperAdmin || _isSystemAdmin;
 

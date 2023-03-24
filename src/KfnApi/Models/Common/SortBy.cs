@@ -3,7 +3,7 @@ using KfnApi.Abstractions;
 
 namespace KfnApi.Models.Common;
 
-public class SortBy<TItem, T> : ISortBy
+public sealed record SortBy<TItem, T> : ISortBy
 {
     private readonly Expression<Func<TItem, T>> _expression;
 

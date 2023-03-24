@@ -1,6 +1,6 @@
 ﻿namespace KfnApi.Models.Common;
 
-public class Result<T> where T : class
+public sealed record Result<T> where T : class
 {
     public Result(T value, int httpCode)
     {
@@ -52,7 +52,7 @@ public class Result<T> where T : class
     }
 }
 
-public class Error
+public sealed record Error
 {
     public int HttpCode { get; set; }
     public string? Title { get; set; }

@@ -7,6 +7,7 @@ public interface IAuthContext
 {
     bool HasUser();
     User GetUser();
+    Guid GetUserId();
     bool IsAdmin();
     bool IsSuperAdmin();
     bool IsSystemAdmin();

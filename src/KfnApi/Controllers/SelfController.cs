@@ -25,7 +25,7 @@ public class SelfController : ControllerBase
         if (user is null)
             return NotFound();
 
-        return Ok(user.ToUserResponse());
+        return Ok(user.ToSelfResponse());
     }
 
     [HttpPatch]
