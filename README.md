@@ -1,9 +1,5 @@
 ## Kurdistan Food Network
 
-<p align="center" width="100%">
-    <img src="https://i.imgur.com/ZlN0rQW.png"  width="460" height="252" alt="">
-</p>
-
 Welcome to Kurdistan Food Network, an open source project that aims to support local producers in the Kurdistan region of Iraq.
 
 The Kurdistan Food Network project was started to help local producers in the Kurdistan region of Iraq to gain more visibility and sell their goods and services to a wider audience. The project provides a digital platform where local producers can create profiles and showcase their products, while customers can browse and place orders for available goods and services.
@@ -22,21 +18,15 @@ This repository contains the source code for the api component in the Kurdistan 
 
 ### Run Locally
 
-To install and run the project locally, please follow these steps:
+#### 1. Use the docker compose provided in the repository
 
-#### 1. Use the docker compose provided in the repository:
-
-The docker compose will provide you with:
-1. %%%
-2. %%%
-
-#### 2. Clone the repository: 
+#### 2. Clone the repository
 
 ```sh
 git clone https://github.com/Ranj101/kfn-api.git
 ```
 
-#### 3. Run the following command to start the application.
+#### 3. Run the following command to start the application
 
 ```sh
 dotnet restore
