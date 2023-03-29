@@ -6,26 +6,26 @@ using KfnApi.Models.Enums.Workflows;
 
 namespace KfnApi.Services.Workflows;
 
-public sealed class ProducerFormWorkflow : IWorkflow<ProducerFormState, ProducerApprovalForm>
+public sealed class ProducerFormWorkflow : IWorkflow<ApprovalFormState, ApprovalForm>
 {
-    private readonly Dictionary<ProducerFormState, StateConfiguration<ProducerFormTrigger, ProducerFormState>> _machine = new();
+    private readonly Dictionary<ApprovalFormState, StateConfiguration<ApprovalFormTrigger, ApprovalFormState>> _machine = new();
 
     public ProducerFormWorkflow()
     {
         ConfigureMachine();
     }
 
-    public bool ApproveProducerForm(ProducerApprovalForm form) => Fire(ProducerFormTrigger.Approve, form);
-    public bool DeclineProducerForm(ProducerApprovalForm form) => Fire(ProducerFormTrigger.Decline, form);
+    public bool ApproveForm(ApprovalForm form) => Fire(ApprovalFormTrigger.Approve, form);
+    public bool DeclineForm(ApprovalForm form) => Fire(ApprovalFormTrigger.Decline, form);
 
-    public List<ProducerFormState> NextPermittedStates(ProducerApprovalForm form)
+    public List<ApprovalFormState> NextPermittedStates(ApprovalForm form)
     {
         return WorkflowExtensions.GetConfiguration(_machine, form, out var configuration)
             ? configuration!.Transitions.Values.ToList()
-            : new List<ProducerFormState>();
+            : new List<ApprovalFormState>();
     }
 
-    private bool Fire(ProducerFormTrigger trigger, ProducerApprovalForm form)
+    private bool Fire(ApprovalFormTrigger trigger, ApprovalForm form)
     {
         if(!WorkflowExtensions.GetConfiguration(_machine, form, out var configuration))
             return false;
@@ -40,12 +40,12 @@ public sealed class ProducerFormWorkflow : IWorkflow<ProducerFormState, Producer
 
     private void ConfigureMachine()
     {
-        _machine.Add(ProducerFormState.Pending, new ()
+        _machine.Add(ApprovalFormState.Pending, new ()
         {
             Transitions = new()
             {
-                { ProducerFormTrigger.Approve, ProducerFormState.Approved },
-                { ProducerFormTrigger.Decline, ProducerFormState.Declined }
+                { ApprovalFormTrigger.Approve, ApprovalFormState.Approved },
+                { ApprovalFormTrigger.Decline, ApprovalFormState.Declined }
             }
         });
     }

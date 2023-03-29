@@ -149,4 +149,16 @@ public static class Mappers
             Producer = report.Producer.ToProducerPageResponse()
         };
     }
+
+    public static UploadResponse ToUploadResponse(this Upload upload)
+    {
+        return new UploadResponse
+        {
+            Key = upload.Key,
+            Size = upload.Size,
+            ContentType = upload.ContentType,
+            OriginalName = upload.OriginalName,
+            DateUploaded = upload.DateUploaded
+        };
+    }
 }

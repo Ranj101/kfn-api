@@ -19,6 +19,7 @@ public sealed record Product : IAuditable, IStateful<ProductState>
 
     // Database Relations
     public Producer? Producer { get; set; }
-    public List<PriceByWeight>? Prices { get; set; }
     public List<Order>? Orders { get; set; }
+    public List<Upload>? Uploads { get; set; }
+    public List<PriceByWeight>? Prices { get; set; }
 }

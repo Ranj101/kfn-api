@@ -1,6 +1,7 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.Helpers.Authorization;
 using KfnApi.Services;
+using KfnApi.Services.Tasks;
 
 namespace KfnApi.Configurations.StartupConfigurations;
 
@@ -11,6 +12,7 @@ public partial class StartupConfigurations
         services.AddScoped<ISelfService, SelfService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthContext, AuthContext>();
+        services.AddScoped<IUploadService, UploadService>();
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IProducerService, ProducerService>();
         services.AddScoped<IRemoteUserService, RemoteUserService>();
@@ -18,6 +20,9 @@ public partial class StartupConfigurations
 
         services.AddSingleton<WorkflowContext>();
         services.AddSingleton<IRoleMap, RoleMap>();
+        services.AddSingleton<ICloudStorageService, CloudStorageService>();
+
+        services.AddHostedService<UploadEraser>();
 
         return services;
     }

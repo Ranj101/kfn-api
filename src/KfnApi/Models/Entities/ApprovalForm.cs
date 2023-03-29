@@ -4,7 +4,7 @@ using KfnApi.Models.Enums.Workflows;
 
 namespace KfnApi.Models.Entities;
 
-public class ProducerApprovalForm : IAuditable, IStateful<ProducerFormState>
+public class ApprovalForm : IAuditable, IStateful<ApprovalFormState>
 {
     public required Guid Id { get; set; }
     [ForeignKey(nameof(User))]
@@ -13,7 +13,7 @@ public class ProducerApprovalForm : IAuditable, IStateful<ProducerFormState>
     public required List<string> Locations { get; set; }
     public required TimeOnly OpeningTime { get; set; }
     public required TimeOnly ClosingTime { get; set; }
-    public required ProducerFormState State { get; set; }
+    public required ApprovalFormState State { get; set; }
 
     public required Guid CreatedBy { get; init; }
     public Guid? UpdatedBy { get; set; }
@@ -22,4 +22,5 @@ public class ProducerApprovalForm : IAuditable, IStateful<ProducerFormState>
 
     // Database Relations
     public User? User { get; set; }
+    public List<Upload>? Uploads { get; set; }
 }

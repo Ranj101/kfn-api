@@ -10,6 +10,8 @@ public sealed record User : IAuditable, IStateful<UserState>
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public required string Email { get; set; }
+    public Guid? ProfilePicture { get; set; }
+    public Guid? CoverPicture { get; set; }
     public List<string> Providers { get; set; } = new();
     public List<string> Roles { get; set; } = new();
     public required UserState State { get; set; }
@@ -22,6 +24,7 @@ public sealed record User : IAuditable, IStateful<UserState>
     // Database Relations
     public Producer? Producer { get; set; }
     public List<Order>? Orders { get; set; }
+    public List<Upload>? Uploads { get; set; }
     public List<UserReport>? AbuseReports { get; set; }
-    public List<ProducerApprovalForm>? ProducerApprovalForms { get; set; }
+    public List<ApprovalForm>? ApprovalForms { get; set; }
 }
