@@ -1,4 +1,5 @@
 ﻿using KfnApi.Abstractions;
+using KfnApi.DTOs.Requests;
 using KfnApi.Helpers.Authorization;
 using KfnApi.Helpers.Database;
 using KfnApi.Helpers.Extensions;
@@ -6,7 +7,6 @@ using KfnApi.Models.Common;
 using KfnApi.Models.Entities;
 using KfnApi.Models.Enums;
 using KfnApi.Models.Enums.Workflows;
-using KfnApi.Models.Requests;
 using Microsoft.EntityFrameworkCore;
 using ZiggyCreatures.Caching.Fusion;
 

@@ -1,6 +1,6 @@
-﻿using KfnApi.Models.Common;
+﻿using KfnApi.DTOs.Requests;
+using KfnApi.Models.Common;
 using KfnApi.Models.Entities;
-using KfnApi.Models.Requests;
 
 namespace KfnApi.Abstractions;
 

@@ -1,7 +1,7 @@
 using KfnApi.Abstractions;
+using KfnApi.DTOs.Requests;
 using KfnApi.Helpers;
 using KfnApi.Helpers.Extensions;
-using KfnApi.Models.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

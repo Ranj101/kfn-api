@@ -2,21 +2,22 @@
 using KfnApi.Abstractions;
 using KfnApi.Models.Enums;
 
-namespace KfnApi.Models.Requests;
+namespace KfnApi.DTOs.Requests;
 
-public sealed record GetAllReportsRequest : IPaginatedRequest
+public sealed record GetAllUsersRequest : IPaginatedRequest, ISortedRequest
 {
     [Range(1, int.MaxValue)]
-    public int PageIndex { get; set; }
+    public int PageIndex { get; set; } = 1;
 
     [Range(1, 100)]
     public int PageSize { get; set; } = 10;
 
-    public Guid? EntityId { get; set; }
+    [Required]
+    public SortBy SortBy { get; set; }
 
     [Required]
     [EnumDataType(typeof(SortDirection))]
     public SortDirection SortDirection { get; set; }
 
-    public ReportType? ReportType { get; set; }
+    public string? SearchByEmail { get; set; }
 }

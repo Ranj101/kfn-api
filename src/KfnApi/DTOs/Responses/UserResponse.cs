@@ -1,8 +1,8 @@
 ﻿using KfnApi.Models.Enums.Workflows;
 
-namespace KfnApi.Models.Responses;
+namespace KfnApi.DTOs.Responses;
 
-public sealed record UserListResponse
+public sealed record UserResponse
 {
     public required Guid Id { get; set; }
     public required string IdentityId { get; set; }
@@ -17,4 +17,7 @@ public sealed record UserListResponse
     public Guid? UpdatedBy { get; set; }
     public required DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; set; }
+
+    public ProducerPageResponse? ProducerPage { get; set; }
+    public List<ReportResponse> AbuseReports { get; set; } = new();
 }

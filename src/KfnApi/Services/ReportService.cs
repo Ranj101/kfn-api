@@ -1,9 +1,9 @@
 ﻿using KfnApi.Abstractions;
+using KfnApi.DTOs.Requests;
 using KfnApi.Helpers.Database;
 using KfnApi.Models.Common;
 using KfnApi.Models.Entities;
 using KfnApi.Models.Enums;
-using KfnApi.Models.Requests;
 using Microsoft.EntityFrameworkCore;
 
 namespace KfnApi.Services;

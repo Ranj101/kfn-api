@@ -1,4 +1,4 @@
-﻿namespace KfnApi.Models.Responses;
+﻿namespace KfnApi.DTOs.Responses;
 
 public sealed record ProducerPageResponse
 {

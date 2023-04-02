@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace KfnApi.Models.Requests;
+namespace KfnApi.DTOs.Requests;
 
 public sealed record SubmitReportRequest
 {

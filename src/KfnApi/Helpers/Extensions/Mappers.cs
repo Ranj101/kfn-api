@@ -1,7 +1,7 @@
 ﻿using KfnApi.Abstractions;
+using KfnApi.DTOs.Responses;
 using KfnApi.Models.Common;
 using KfnApi.Models.Entities;
-using KfnApi.Models.Responses;
 
 namespace KfnApi.Helpers.Extensions;
 

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using KfnApi.Models.Enums.Workflows;
 
-namespace KfnApi.Models.Requests;
+namespace KfnApi.DTOs.Requests;
 
 public sealed record UpdateUserStateRequest
 {
