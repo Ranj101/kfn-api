@@ -11,7 +11,7 @@ public class UploadService : IUploadService
     private readonly DatabaseContext _databaseContext;
     private readonly ICloudStorageService _cloudService;
 
-    public UploadService(DatabaseContext databaseContext,ICloudStorageService cloudService)
+    public UploadService(DatabaseContext databaseContext, ICloudStorageService cloudService)
     {
         _cloudService = cloudService;
         _databaseContext = databaseContext;

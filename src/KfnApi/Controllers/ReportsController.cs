@@ -17,12 +17,14 @@ public class ReportsController : KfnControllerBase
     private readonly IUserService _userService;
     private readonly IReportService _reportService;
     private readonly IProducerService _producerService;
+    private readonly ICloudStorageService _cloudService;
 
-    public ReportsController(IReportService reportService, IUserService userService, IProducerService producerService)
+    public ReportsController(IReportService reportService, IUserService userService, IProducerService producerService, ICloudStorageService cloudService)
     {
         _userService = userService;
         _reportService = reportService;
         _producerService = producerService;
+        _cloudService = cloudService;
     }
 
     [HttpGet]
@@ -50,7 +52,7 @@ public class ReportsController : KfnControllerBase
         if (request.ReportType == ReportType.UserReports)
         {
             var paginated = await _reportService.GetAllUserReportsAsync(request);
-            var mapped = paginated.Select(r => r.ToUserReportResponse()).ToList();
+            var mapped = paginated.Select(r => r.ToUserReportResponse(_cloudService)).ToList();
             return Ok(paginated.ToPaginatedResponse(mapped));
         }
 
@@ -62,7 +64,7 @@ public class ReportsController : KfnControllerBase
         }
 
         var paginatedUserReports = await _reportService.GetAllUserReportsAsync(request);
-        var mappedUserReports = paginatedUserReports.Select(r => r.ToUserReportResponse()).ToList();
+        var mappedUserReports = paginatedUserReports.Select(r => r.ToUserReportResponse(_cloudService)).ToList();
 
         var paginatedProducerReports = await _reportService.GetAllProducerReportsAsync(request);
         var mappedProducerReports = paginatedProducerReports.Select(r => r.ToProducerReportResponse()).ToList();
@@ -89,7 +91,7 @@ public class ReportsController : KfnControllerBase
         var userReport = await _reportService.GetUserReportByIdAsync(id);
 
         if (userReport is not null)
-            return Ok(userReport.ToUserReportResponse());
+            return Ok(userReport.ToUserReportResponse(_cloudService));
 
         var producerReport = await _reportService.GetProducerReportByIdAsync(id);
 
@@ -102,13 +104,15 @@ public class ReportsController : KfnControllerBase
     public async Task<IActionResult> SubmitReportAsync(Guid id, SubmitReportRequest request)
     {
         var user = await _userService.GetByIdAsync(id);
+
         if (user is not null)
         {
             var report = await _reportService.CreateUserReportAsync(user.Id, request);
-            return Created("",report.ToUserReportResponse());
+            return Created("",report.ToUserReportResponse(_cloudService));
         }
 
         var producer = await _producerService.GetProducerByIdAsync(id);
+
         if (producer is not null)
         {
             var report = await _reportService.CreateProducerReportAsync(producer.Id, request);

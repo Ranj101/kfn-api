@@ -2,7 +2,7 @@
 
 public interface ICloudStorageService
 {
-    string GetPreSignedUrl(string key);
+    string GetPreSignedUrl(Guid key);
     Task PutObjectAsync(string key, IFormFile file, CancellationToken token);
     Task DeleteObjectAsync(string key, CancellationToken token);
     Task DeleteObjectAsync(string key);

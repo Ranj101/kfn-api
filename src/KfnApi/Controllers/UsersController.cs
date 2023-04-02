@@ -12,56 +12,59 @@ namespace KfnApi.Controllers;
 [Route("v1/users")]
 public class UsersController : KfnControllerBase
 {
-    private readonly IUserService _service;
+    private readonly IUserService _userService;
+    private readonly ICloudStorageService _cloudService;
 
-    public UsersController(IUserService service)
+    public UsersController(IUserService userService, ICloudStorageService cloudService)
     {
-        _service = service;
+        _userService = userService;
+        _cloudService = cloudService;
     }
 
     [HttpGet("profiles")]
     public async Task<IActionResult> GetProfilesAsync([FromQuery] GetAllUsersRequest request)
     {
-        var paginated = await _service.GetAllUsersAsync(request);
-        var profiles = paginated.Select(user => user.ToProfileResponse()).ToList();
+        var paginated = await _userService.GetAllUsersAsync(request);
+        var profiles = paginated.Select(user => user.ToProfileResponse(_cloudService)).ToList();
         return Ok(paginated.ToPaginatedResponse(profiles));
     }
 
     [HttpGet("profiles/{id:guid}")]
     public async Task<IActionResult> GetProfileAsync(Guid id)
     {
-        var user = await _service.GetByIdAsync(id);
+        var user = await _userService.GetByIdAsync(id);
 
         return user is null
             ? NotFoundResponse()
-            : Ok(user.ToProfileResponse());
+            : Ok(user.ToProfileResponse(_cloudService));
     }
 
     [HttpGet]
     public async Task<IActionResult> GetUsersAsync([FromQuery] GetAllUsersRequest request)
     {
-        var paginated = await _service.GetAllUsersAsync(request);
-        var users = paginated.Select(user => user.ToUserListResponse()).ToList();
+        var paginated = await _userService.GetAllUsersAsync(request);
+        var users = paginated.Select(user => user.ToUserListResponse(_cloudService)).ToList();
+
         return Ok(paginated.ToPaginatedResponse(users));
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetUserAsync(Guid id)
     {
-        var user = await _service.GetByIdAsync(id);
+        var user = await _userService.GetByIdAsync(id);
 
         return user is null
             ? NotFoundResponse()
-            : Ok(user.ToUserResponse());
+            : Ok(user.ToUserResponse(_cloudService));
     }
 
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> UpdateUserStateAsync(Guid id, UpdateUserStateRequest request)
     {
-        var result = await _service.UpdateUserState(id, request);
+        var result = await _userService.UpdateUserState(id, request);
 
         return result.IsSuccess()
-            ? SuccessResponse(result.Value!.ToUserListResponse(), result.HttpCode)
+            ? SuccessResponse(result.Value!.ToUserListResponse(_cloudService), result.HttpCode)
             : ErrorResponse(result.Error!);
     }
 }

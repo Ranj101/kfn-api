@@ -18,9 +18,9 @@ public class CloudStorageService : ICloudStorageService
         _options = options.Value;
     }
 
-    public string GetPreSignedUrl(string key)
+    public string GetPreSignedUrl(Guid key)
     {
-        return _urlSigner.Sign(_options.Bucket, key, TimeSpan.FromDays(1));
+        return _urlSigner.Sign(_options.Bucket, key.ToString(), TimeSpan.FromDays(1));
     }
 
     public async Task PutObjectAsync(string key, IFormFile file, CancellationToken token)

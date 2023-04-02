@@ -12,10 +12,13 @@ public static class Mappers
         return new PaginatedResponse<T, TMapped>(paginated, data);
     }
 
-    public static UserResponse ToUserResponse(this User user)
+    public static UserResponse ToUserResponse(this User user, ICloudStorageService service)
     {
         if(user.AbuseReports is null)
             throw new ArgumentException("null parameter mapping", nameof(user.AbuseReports));
+
+        var coverUrl = GetPreSignedUrl(user.CoverPicture, service);
+        var profileUrl = GetPreSignedUrl(user.ProfilePicture, service);
 
         return new UserResponse
         {
@@ -23,8 +26,10 @@ public static class Mappers
             Email = user.Email,
             Roles = user.Roles,
             State = user.State,
-            LastName = user.LastName,
             FirstName = user.FirstName,
+            LastName = user.LastName,
+            CoverPicture = coverUrl,
+            ProfilePicture = profileUrl,
             Providers = user.Providers,
             CreatedBy = user.CreatedBy,
             UpdatedBy = user.UpdatedBy,
@@ -36,16 +41,21 @@ public static class Mappers
         };
     }
 
-    public static UserListResponse ToUserListResponse(this User user)
+    public static UserListResponse ToUserListResponse(this User user, ICloudStorageService service)
     {
+        var coverUrl = GetPreSignedUrl(user.CoverPicture, service);
+        var profileUrl = GetPreSignedUrl(user.ProfilePicture, service);
+
         return new UserListResponse
         {
             Id = user.Id,
             Email = user.Email,
             Roles = user.Roles,
             State = user.State,
-            LastName = user.LastName,
             FirstName = user.FirstName,
+            LastName = user.LastName,
+            CoverPicture = coverUrl,
+            ProfilePicture = profileUrl,
             Providers = user.Providers,
             CreatedBy = user.CreatedBy,
             UpdatedBy = user.UpdatedBy,
@@ -55,28 +65,38 @@ public static class Mappers
         };
     }
 
-    public static ProfileResponse ToProfileResponse(this User user)
+    public static ProfileResponse ToProfileResponse(this User user, ICloudStorageService service)
     {
+        var coverUrl = GetPreSignedUrl(user.CoverPicture, service);
+        var profileUrl = GetPreSignedUrl(user.ProfilePicture, service);
+
         return new ProfileResponse
         {
             Id = user.Id,
             Email = user.Email,
             FirstName = user.FirstName,
             LastName = user.LastName,
+            CoverPicture = coverUrl,
+            ProfilePicture = profileUrl,
             CreatedAt = user.CreatedAt,
             Providers = user.Providers
         };
     }
 
-    public static SelfResponse ToSelfResponse(this User user)
+    public static SelfResponse ToSelfResponse(this User user, ICloudStorageService service)
     {
+        var coverUrl = GetPreSignedUrl(user.CoverPicture, service);
+        var profileUrl = GetPreSignedUrl(user.ProfilePicture, service);
+
         return new SelfResponse
         {
             Id = user.Id,
             Email = user.Email,
             Roles = user.Roles,
-            LastName = user.LastName,
             FirstName = user.FirstName,
+            LastName = user.LastName,
+            CoverPicture = coverUrl,
+            ProfilePicture = profileUrl,
             Providers = user.Providers,
             CreatedBy = user.CreatedBy,
             UpdatedBy = user.UpdatedBy,
@@ -114,7 +134,7 @@ public static class Mappers
         };
     }
 
-    public static UserReportResponse ToUserReportResponse(this UserReport report)
+    public static UserReportResponse ToUserReportResponse(this UserReport report, ICloudStorageService service)
     {
         if(report.User is null)
             throw new ArgumentException("null parameter mapping", nameof(report.User));
@@ -128,7 +148,7 @@ public static class Mappers
             CreatedAt = report.CreatedAt,
             UpdatedBy = report.UpdatedBy,
             UpdatedAt = report.UpdatedAt,
-            User = report.User.ToProfileResponse()
+            User = report.User.ToProfileResponse(service)
         };
     }
 
@@ -160,5 +180,10 @@ public static class Mappers
             OriginalName = upload.OriginalName,
             DateUploaded = upload.DateUploaded
         };
+    }
+
+    private static string? GetPreSignedUrl(Guid? key, ICloudStorageService service)
+    {
+        return key.HasValue ? service.GetPreSignedUrl(key.Value) : null;
     }
 }
