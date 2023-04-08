@@ -66,7 +66,7 @@ public class UserService : IUserService
         var users = _databaseContext.Users
             .Include(u => u.Producer)
             .Include(u => u.AbuseReports)
-            .Where(user => request.SearchByEmail == null || user.Email.ToLower().Contains(request.SearchByEmail!.Trim().ToLower()))
+            .Where(user => request.FilterByEmail == null || user.Email.ToLower().Contains(request.FilterByEmail!.Trim().ToLower()))
             .AsQueryable();
 
         users = request.SortDirection == SortDirection.Descending

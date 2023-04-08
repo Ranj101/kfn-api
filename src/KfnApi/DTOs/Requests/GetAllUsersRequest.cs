@@ -19,5 +19,5 @@ public sealed record GetAllUsersRequest : IPaginatedRequest, ISortedRequest
     [EnumDataType(typeof(SortDirection))]
     public SortDirection SortDirection { get; set; }
 
-    public string? SearchByEmail { get; set; }
+    public string? FilterByEmail { get; set; }
 }

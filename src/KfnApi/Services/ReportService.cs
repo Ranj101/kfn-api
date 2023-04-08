@@ -36,7 +36,7 @@ public class ReportService : IReportService
     public async Task<PaginatedList<UserReport>> GetAllUserReportsByIdAsync(GetAllReportsRequest request)
     {
         var reports = _databaseContext.UserReports
-            .Where(u => u.UserId == request.EntityId);
+            .Where(u => u.UserId == request.AffiliatedEntityId);
 
         var paginated = await PaginatedList<UserReport>.CreateAsync(reports, request.PageIndex, request.PageSize);
 
@@ -46,7 +46,7 @@ public class ReportService : IReportService
     public async Task<PaginatedList<ProducerReport>> GetAllProducerReportsByIdAsync(GetAllReportsRequest request)
     {
         var reports = _databaseContext.ProducerReports
-            .Where(p => p.ProducerId == request.EntityId);
+            .Where(p => p.ProducerId == request.AffiliatedEntityId);
 
         var paginated = await PaginatedList<ProducerReport>.CreateAsync(reports, request.PageIndex, request.PageSize);
 

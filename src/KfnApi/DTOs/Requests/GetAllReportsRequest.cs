@@ -12,11 +12,11 @@ public sealed record GetAllReportsRequest : IPaginatedRequest
     [Range(1, 100)]
     public int PageSize { get; set; } = 10;
 
-    public Guid? EntityId { get; set; }
+    public Guid? AffiliatedEntityId { get; set; }
 
     [Required]
     [EnumDataType(typeof(SortDirection))]
     public SortDirection SortDirection { get; set; }
 
-    public ReportType? ReportType { get; set; }
+    public ReportType? FilterByReportType { get; set; }
 }

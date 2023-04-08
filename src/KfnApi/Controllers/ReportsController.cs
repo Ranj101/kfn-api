@@ -30,7 +30,7 @@ public class ReportsController : KfnControllerBase
     [HttpGet]
     public async Task<IActionResult> GetReportsAsync([FromQuery] GetAllReportsRequest request)
     {
-        if (request.EntityId is not null)
+        if (request.AffiliatedEntityId is not null)
         {
             var paginatedUserRep = await _reportService.GetAllUserReportsByIdAsync(request);
             if (paginatedUserRep.Any())
@@ -49,14 +49,14 @@ public class ReportsController : KfnControllerBase
             return Ok(paginatedProducerRep.ToPaginatedResponse(new List<object>()));
         }
 
-        if (request.ReportType == ReportType.UserReports)
+        if (request.FilterByReportType == ReportType.UserReports)
         {
             var paginated = await _reportService.GetAllUserReportsAsync(request);
             var mapped = paginated.Select(r => r.ToUserReportResponse(_cloudService)).ToList();
             return Ok(paginated.ToPaginatedResponse(mapped));
         }
 
-        if (request.ReportType == ReportType.ProducerReports)
+        if (request.FilterByReportType == ReportType.ProducerReports)
         {
             var paginated = await _reportService.GetAllProducerReportsAsync(request);
             var mapped = paginated.Select(r => r.ToProducerReportResponse()).ToList();
