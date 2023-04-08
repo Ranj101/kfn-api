@@ -6,11 +6,11 @@ using KfnApi.Models.Enums.Workflows;
 
 namespace KfnApi.Services.Workflows;
 
-public sealed class ProducerFormWorkflow : IWorkflow<ApprovalFormState, ApprovalForm>
+public sealed class ApprovalFormWorkflow : IWorkflow<ApprovalFormState, ApprovalForm>
 {
     private readonly Dictionary<ApprovalFormState, StateConfiguration<ApprovalFormTrigger, ApprovalFormState>> _machine = new();
 
-    public ProducerFormWorkflow()
+    public ApprovalFormWorkflow()
     {
         ConfigureMachine();
     }
