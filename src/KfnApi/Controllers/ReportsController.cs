@@ -2,7 +2,6 @@
 using KfnApi.DTOs.Requests;
 using KfnApi.Helpers;
 using KfnApi.Helpers.Extensions;
-using KfnApi.Models.Common;
 using KfnApi.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -84,9 +83,9 @@ public class ReportsController : KfnControllerBase
     }
 
     [HttpPost("{id:guid}")]
-    public async Task<IActionResult> SubmitReportAsync(Guid id, SubmitReportRequest request)
+    public async Task<IActionResult> SubmitReportAsync(Guid id, [FromBody] SubmitReportRequest request)
     {
-        var user = await _userService.GetByIdAsync(id);
+        var user = await _userService.GetByIdAsync(id, activeOnly:true);
 
         if (user is not null)
         {
@@ -94,7 +93,7 @@ public class ReportsController : KfnControllerBase
             return Created("",report.ToUserReportResponse(_cloudService));
         }
 
-        var producer = await _producerService.GetProducerByIdAsync(id);
+        var producer = await _producerService.GetByIdAsync(id, activeOnly:true);
 
         if (producer is not null)
         {
@@ -102,11 +101,6 @@ public class ReportsController : KfnControllerBase
             return Created("", report.ToProducerReportResponse());
         }
 
-        return ErrorResponse(new Error
-        {
-            HttpCode = StatusCodes.Status400BadRequest,
-            Title = "Requested Resource Not Found",
-            Detail = "Could not find resource with given id."
-        });
+        return NotFoundResponse();
     }
 }

@@ -53,20 +53,24 @@ public class UserService : IUserService
         return dbUser;
     }
 
-    public async Task<User?> GetByIdAsync(Guid id)
+    public async Task<User?> GetByIdAsync(Guid id, bool activeOnly = false)
     {
         return await _databaseContext.Users
             .Include(u => u.Producer)
             .Include(u => u.AbuseReports)
-            .FirstOrDefaultAsync(u => u.Id == id);
+            .FirstOrDefaultAsync(u => u.Id == id && (!activeOnly || u.State == UserState.Active));
     }
 
     public async Task<PaginatedList<User>> GetAllUsersAsync(GetAllUsersRequest request)
     {
+        var stateFilter = request.FilterByState is null;
+        var emailFilter = request.FilterByEmail is null;
+
         var users = _databaseContext.Users
             .Include(u => u.Producer)
             .Include(u => u.AbuseReports)
-            .Where(user => request.FilterByEmail == null || user.Email.ToLower().Contains(request.FilterByEmail!.Trim().ToLower()))
+            .Where(user => (emailFilter || user.Email.ToLower().Contains(request.FilterByEmail!.Trim().ToLower())) &&
+                           (stateFilter || user.State == request.FilterByState))
             .AsQueryable();
 
         users = request.SortDirection == SortDirection.Descending

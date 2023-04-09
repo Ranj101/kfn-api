@@ -35,7 +35,7 @@ public class SelfController : KfnControllerBase
     }
 
     [HttpPatch]
-    public async Task<IActionResult> UpdateSelfAsync(UpdateSelfRequest request)
+    public async Task<IActionResult> UpdateSelfAsync([FromBody] UpdateSelfRequest request)
     {
         var result = await _selfService.UpdateSelfAsync(request);
 
@@ -45,7 +45,7 @@ public class SelfController : KfnControllerBase
     }
 
     [HttpPut("forms/{id:guid}")]
-    public async Task<IActionResult> UpdateFormAsync(Guid id, SubmitFormRequest request)
+    public async Task<IActionResult> UpdateFormAsync(Guid id, [FromBody] SubmitFormRequest request)
     {
         var result = await _formService.UpdateFormAsync(id, request);
 

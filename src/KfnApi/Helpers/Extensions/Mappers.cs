@@ -36,7 +36,7 @@ public static class Mappers
             CreatedAt = user.CreatedAt,
             UpdatedAt = user.UpdatedAt,
             IdentityId = user.IdentityId,
-            ProducerPage = user.Producer?.ToProducerPageResponse(),
+            ProducerPage = user.Producer?.ToProducerListResponse(),
             AbuseReports = user.AbuseReports.Select(x => x.ToReportResponse()).ToList()
         };
     }
@@ -105,17 +105,68 @@ public static class Mappers
         };
     }
 
-    public static ProducerPageResponse ToProducerPageResponse(this Producer producer)
+    public static ProducerResponse ToProducerResponse(this Producer producer, ICloudStorageService service)
     {
+        if(producer.Uploads is null)
+            throw new ArgumentException("null parameter mapping", nameof(producer.Uploads));
+
+        return new ProducerResponse
+        {
+            Id = producer.Id,
+            Name = producer.Name,
+            Locations = producer.Locations,
+            OpeningTime = producer.OpeningTime,
+            ClosingTime = producer.ClosingTime,
+            State = producer.State,
+            CreatedBy = producer.CreatedBy,
+            CreatedAt = producer.CreatedAt,
+            UpdatedBy = producer.UpdatedBy,
+            UpdatedAt = producer.UpdatedAt,
+            Reviews = producer.Reviews,
+            Gallery = producer.Uploads.Select(x => GetPreSignedUrl(x.Key, service)!).ToList()
+        };
+    }
+
+    public static ProducerPageListResponse ToProducerPageListResponse(this Producer producer)
+    {
+        return new ProducerPageListResponse
+        {
+            Id = producer.Id,
+            Name = producer.Name,
+            Locations = producer.Locations,
+            OpeningTime = producer.OpeningTime,
+            ClosingTime = producer.ClosingTime
+        };
+    }
+
+    public static ProducerListResponse ToProducerListResponse(this Producer producer)
+    {
+        return new ProducerListResponse
+        {
+            Id = producer.Id,
+            Name = producer.Name,
+            State = producer.State,
+            Locations = producer.Locations,
+            OpeningTime = producer.OpeningTime,
+            ClosingTime = producer.ClosingTime
+        };
+    }
+
+    public static ProducerPageResponse ToProducerPageResponse(this Producer producer, ICloudStorageService service)
+    {
+        if(producer.Uploads is null)
+            throw new ArgumentException("null parameter mapping", nameof(producer.Uploads));
+
         return new ProducerPageResponse
         {
             Id = producer.Id,
             Name = producer.Name,
-            Reviews = producer.Reviews,
             Locations = producer.Locations,
             CreatedAt = producer.CreatedAt,
             OpeningTime = producer.OpeningTime,
-            ClosingTime = producer.ClosingTime
+            ClosingTime = producer.ClosingTime,
+            Reviews = producer.Reviews,
+            Gallery = producer.Uploads.Select(x => GetPreSignedUrl(x.Key, service)!).ToList()
         };
     }
 
@@ -165,7 +216,7 @@ public static class Mappers
             CreatedAt = report.CreatedAt,
             UpdatedBy = report.UpdatedBy,
             UpdatedAt = report.UpdatedAt,
-            Producer = report.Producer.ToProducerPageResponse()
+            Producer = report.Producer.ToProducerListResponse()
         };
     }
 

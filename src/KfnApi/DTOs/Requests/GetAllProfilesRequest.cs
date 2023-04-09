@@ -4,7 +4,7 @@ using KfnApi.Models.Enums;
 
 namespace KfnApi.DTOs.Requests;
 
-public sealed record GetAllReportsRequest : IPaginatedRequest
+public sealed record GetAllProfilesRequest : IPaginatedRequest, ISortedRequest<SortUserBy>
 {
     [Range(1, int.MaxValue)]
     public int PageIndex { get; set; } = 1;
@@ -12,11 +12,12 @@ public sealed record GetAllReportsRequest : IPaginatedRequest
     [Range(1, 100)]
     public int PageSize { get; set; } = 10;
 
-    public Guid? AffiliatedEntityId { get; set; }
+    [Required]
+    public SortUserBy SortBy { get; set; }
 
     [Required]
     [EnumDataType(typeof(SortDirection))]
     public SortDirection SortDirection { get; set; }
 
-    public ReportType? FilterByReportType { get; set; }
+    public string? FilterByEmail { get; set; }
 }

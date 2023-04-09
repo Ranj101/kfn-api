@@ -1,13 +1,21 @@
-﻿namespace KfnApi.DTOs.Responses;
+﻿using KfnApi.Models.Enums.Workflows;
 
-public sealed record ProducerPageResponse
+namespace KfnApi.DTOs.Responses;
+
+public sealed record ProducerResponse
 {
     public required Guid Id { get; set; }
     public required string Name { get; set; }
     public required List<string> Locations { get; set; }
     public required TimeOnly OpeningTime { get; set; }
     public required TimeOnly ClosingTime { get; set; }
-    public required DateTime CreatedAt { get; init; }
+    public required ProducerState State { get; set; }
+
+    public required Guid CreatedBy { get; init; }
+    public required DateTime CreatedAt { get; set; }
+    public Guid? UpdatedBy { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+
     public List<string> Reviews { get; set; } = new();
     public List<string> Gallery { get; set; } = new();
 }

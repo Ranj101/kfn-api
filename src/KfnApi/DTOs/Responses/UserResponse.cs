@@ -20,6 +20,6 @@ public sealed record UserResponse
     public required DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; set; }
 
-    public ProducerPageResponse? ProducerPage { get; set; }
+    public ProducerListResponse? ProducerPage { get; set; }
     public List<ReportResponse> AbuseReports { get; set; } = new();
 }

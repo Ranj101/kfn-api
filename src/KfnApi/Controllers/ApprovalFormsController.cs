@@ -41,10 +41,8 @@ public class ApprovalFormsController : KfnControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> SubmitFormAsync(SubmitFormRequest request)
+    public async Task<IActionResult> SubmitFormAsync([FromBody] SubmitFormRequest request)
     {
-        var test = new TimeOnly(1, 30);
-
         var result = await _service.CreateFormAsync(request);
 
         return result.IsSuccess()
@@ -53,7 +51,7 @@ public class ApprovalFormsController : KfnControllerBase
     }
 
     [HttpPatch("{id:guid}")]
-    public async Task<IActionResult> UpdateFormStateAsync(Guid id, UpdateFormStateRequest request)
+    public async Task<IActionResult> UpdateFormStateAsync(Guid id, [FromBody] UpdateFormStateRequest request)
     {
         var result = await _service.UpdateFormStateAsync(id, request);
 

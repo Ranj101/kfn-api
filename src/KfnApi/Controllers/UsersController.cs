@@ -22,8 +22,9 @@ public class UsersController : KfnControllerBase
     }
 
     [HttpGet("profiles")]
-    public async Task<IActionResult> GetProfilesAsync([FromQuery] GetAllUsersRequest request)
+    public async Task<IActionResult> GetProfilesAsync([FromQuery] GetAllProfilesRequest profilesRequest)
     {
+        var request = new GetAllUsersRequest(profilesRequest);
         var paginated = await _userService.GetAllUsersAsync(request);
         var profiles = paginated.Select(user => user.ToProfileResponse(_cloudService)).ToList();
         return Ok(paginated.ToPaginatedResponse(profiles));
@@ -32,7 +33,7 @@ public class UsersController : KfnControllerBase
     [HttpGet("profiles/{id:guid}")]
     public async Task<IActionResult> GetProfileAsync(Guid id)
     {
-        var user = await _userService.GetByIdAsync(id);
+        var user = await _userService.GetByIdAsync(id, activeOnly:true);
 
         return user is null
             ? NotFoundResponse()
@@ -44,7 +45,6 @@ public class UsersController : KfnControllerBase
     {
         var paginated = await _userService.GetAllUsersAsync(request);
         var users = paginated.Select(user => user.ToUserListResponse(_cloudService)).ToList();
-
         return Ok(paginated.ToPaginatedResponse(users));
     }
 
@@ -59,7 +59,7 @@ public class UsersController : KfnControllerBase
     }
 
     [HttpPatch("{id:guid}")]
-    public async Task<IActionResult> UpdateUserStateAsync(Guid id, UpdateUserStateRequest request)
+    public async Task<IActionResult> UpdateUserStateAsync(Guid id, [FromBody] UpdateUserStateRequest request)
     {
         var result = await _userService.UpdateUserStateAsync(id, request);
 

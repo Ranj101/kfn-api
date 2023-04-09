@@ -11,5 +11,5 @@ public sealed record ProducerReportResponse
     public Guid? UpdatedBy { get; set; }
     public DateTime? UpdatedAt { get; set; }
 
-    public required ProducerPageResponse Producer { get; set; }
+    public required ProducerListResponse Producer { get; set; }
 }
