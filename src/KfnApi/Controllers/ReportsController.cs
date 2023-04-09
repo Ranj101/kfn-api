@@ -52,37 +52,20 @@ public class ReportsController : KfnControllerBase
         if (request.FilterByReportType == ReportType.UserReports)
         {
             var paginated = await _reportService.GetAllUserReportsAsync(request);
-            var mapped = paginated.Select(r => r.ToUserReportResponse(_cloudService)).ToList();
+            var mapped = paginated.Select(r => r.ToReportResponse()).ToList();
             return Ok(paginated.ToPaginatedResponse(mapped));
         }
 
         if (request.FilterByReportType == ReportType.ProducerReports)
         {
             var paginated = await _reportService.GetAllProducerReportsAsync(request);
-            var mapped = paginated.Select(r => r.ToProducerReportResponse()).ToList();
+            var mapped = paginated.Select(r => r.ToReportResponse()).ToList();
             return Ok(paginated.ToPaginatedResponse(mapped));
         }
 
-        var paginatedUserReports = await _reportService.GetAllUserReportsAsync(request);
-        var mappedUserReports = paginatedUserReports.Select(r => r.ToUserReportResponse(_cloudService)).ToList();
+        var paginatedResponse = await _reportService.GetAllReportsAsync(request);
 
-        var paginatedProducerReports = await _reportService.GetAllProducerReportsAsync(request);
-        var mappedProducerReports = paginatedProducerReports.Select(r => r.ToProducerReportResponse()).ToList();
-
-        var combinedPaginatedResponse = new
-        {
-            Page = paginatedUserReports.PageIndex,
-            PageSize = paginatedUserReports.PageSize,
-            Count = paginatedUserReports.TotalCount + paginatedProducerReports.TotalCount,
-            TotalPages = paginatedUserReports.TotalPages + paginatedProducerReports.TotalPages,
-            Data = new
-            {
-                UserReports = mappedUserReports,
-                ProducerReports = mappedProducerReports
-            }
-        };
-
-        return Ok(combinedPaginatedResponse);
+        return Ok(paginatedResponse.ToPaginatedResponse(paginatedResponse));
     }
 
     [HttpGet("{id:guid}")]

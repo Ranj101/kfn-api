@@ -101,8 +101,7 @@ public static class Mappers
             CreatedBy = user.CreatedBy,
             UpdatedBy = user.UpdatedBy,
             CreatedAt = user.CreatedAt,
-            UpdatedAt = user.UpdatedAt,
-            ProducerPage = user.Producer?.ToProducerPageResponse()
+            UpdatedAt = user.UpdatedAt
         };
     }
 

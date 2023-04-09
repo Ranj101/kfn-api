@@ -24,7 +24,6 @@ public class SelfService : ISelfService
     public async Task<User?> GetSelfAsync()
     {
         return await _databaseContext.Users
-            .Include(u => u.Producer)
             .FirstOrDefaultAsync(u => u.Id == _authContext.GetUserId());
     }
 
@@ -42,7 +41,6 @@ public class SelfService : ISelfService
             uploads = await TryAddUploadAsync(uploads, request.ProfilePicture!.Value);
 
         var user = await _databaseContext.Users
-            .Include(u => u.Producer)
             .Include(u => u.Uploads)
             .FirstOrDefaultAsync(u => u.Id == _authContext.GetUserId());
 
