@@ -1,6 +1,6 @@
 ﻿namespace KfnApi.Models.Enums;
 
-public enum SortBy
+public enum SortUserBy
 {
     DateCreated,
     FirstName,

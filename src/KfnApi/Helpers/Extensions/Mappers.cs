@@ -182,6 +182,48 @@ public static class Mappers
         };
     }
 
+    public static FormResponse ToFormResponse(this ApprovalForm form, ICloudStorageService service)
+    {
+        if(form.Uploads is null)
+            throw new ArgumentException("null parameter mapping", nameof(form.Uploads));
+
+        if(form.User is null)
+            throw new ArgumentException("null parameter mapping", nameof(form.User));
+
+        return new FormResponse
+        {
+            Id = form.Id,
+            State = form.State,
+            ProducerName = form.ProducerName,
+            Locations = form.Locations,
+            OpeningTime = form.OpeningTime,
+            ClosingTime = form.ClosingTime,
+            CreatedBy = form.CreatedBy,
+            UpdatedBy = form.UpdatedBy,
+            CreatedAt = form.CreatedAt,
+            UpdatedAt = form.UpdatedAt,
+            User = form.User.ToProfileResponse(service),
+            Uploads = form.Uploads.Select(x => GetPreSignedUrl(x.Key, service)!).ToList()
+        };
+    }
+
+    public static FormListResponse ToFormListResponse(this ApprovalForm form)
+    {
+        return new FormListResponse
+        {
+            Id = form.Id,
+            State = form.State,
+            ProducerName = form.ProducerName,
+            Locations = form.Locations,
+            OpeningTime = form.OpeningTime,
+            ClosingTime = form.ClosingTime,
+            CreatedBy = form.CreatedBy,
+            UpdatedBy = form.UpdatedBy,
+            CreatedAt = form.CreatedAt,
+            UpdatedAt = form.UpdatedAt
+        };
+    }
+
     private static string? GetPreSignedUrl(Guid? key, ICloudStorageService service)
     {
         return key.HasValue ? service.GetPreSignedUrl(key.Value) : null;

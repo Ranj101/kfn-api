@@ -17,6 +17,7 @@ public partial class StartupConfigurations
         services.AddScoped<IProducerService, ProducerService>();
         services.AddScoped<IRemoteUserService, RemoteUserService>();
         services.AddScoped<IPermissionService, PermissionService>();
+        services.AddScoped<IApprovalFormService, ApprovalFormService>();
 
         services.AddSingleton<WorkflowContext>();
         services.AddSingleton<IRoleMap, RoleMap>();

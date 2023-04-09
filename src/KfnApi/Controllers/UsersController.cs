@@ -61,7 +61,7 @@ public class UsersController : KfnControllerBase
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> UpdateUserStateAsync(Guid id, UpdateUserStateRequest request)
     {
-        var result = await _userService.UpdateUserState(id, request);
+        var result = await _userService.UpdateUserStateAsync(id, request);
 
         return result.IsSuccess()
             ? SuccessResponse(result.Value!.ToUserListResponse(_cloudService), result.HttpCode)

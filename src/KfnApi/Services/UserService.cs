@@ -14,11 +14,11 @@ namespace KfnApi.Services;
 
 public class UserService : IUserService
 {
-    private static readonly Dictionary<SortBy, ISortBy> SortFunctions = new ()
+    private static readonly Dictionary<SortUserBy, ISortBy> SortFunctions = new ()
     {
-        { SortBy.DateCreated, new SortBy<User, DateTime>(x => x.CreatedAt) },
-        { SortBy.FirstName, new SortBy<User, string>(x => x.FirstName) },
-        { SortBy.LastName, new SortBy<User, string>(x => x.LastName) }
+        { SortUserBy.DateCreated, new SortBy<User, DateTime>(x => x.CreatedAt) },
+        { SortUserBy.FirstName, new SortBy<User, string>(x => x.FirstName) },
+        { SortUserBy.LastName, new SortBy<User, string>(x => x.LastName) }
     };
 
     private readonly IFusionCache _cache;
@@ -113,7 +113,7 @@ public class UserService : IUserService
         return entry.Entity;
     }
 
-    public async Task<Result<User>> UpdateUserState(Guid id, UpdateUserStateRequest request)
+    public async Task<Result<User>> UpdateUserStateAsync(Guid id, UpdateUserStateRequest request)
     {
         var user = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == id);
 
