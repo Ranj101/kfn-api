@@ -18,7 +18,7 @@ public sealed record Producer : IAuditable, IStateful<ProducerState>
 
     public required Guid CreatedBy { get; init; }
     public Guid? UpdatedBy { get; set; }
-    public required DateTime CreatedAt { get; init; }
+    public DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; set; }
 
     // Database Relations

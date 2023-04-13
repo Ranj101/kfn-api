@@ -1,5 +1,6 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.DTOs.Requests;
+using KfnApi.Helpers.Authorization;
 using KfnApi.Helpers.Database;
 using KfnApi.Helpers.Extensions;
 using KfnApi.Models.Common;
@@ -18,14 +19,19 @@ public class ApprovalFormService : IApprovalFormService
     };
 
     private readonly IAuthContext _authContext;
+    private readonly IUserService _userService;
     private readonly WorkflowContext _workflowContext;
     private readonly DatabaseContext _databaseContext;
+    private readonly IProducerService _producerService;
 
-    public ApprovalFormService(DatabaseContext databaseContext, WorkflowContext workflowContext, IAuthContext authContext)
+    public ApprovalFormService(DatabaseContext databaseContext, WorkflowContext workflowContext, IAuthContext authContext,
+        IProducerService producerService, IUserService userService)
     {
         _authContext = authContext;
+        _userService = userService;
         _workflowContext = workflowContext;
         _databaseContext = databaseContext;
+        _producerService = producerService;
     }
 
     public async Task<ApprovalForm?> GetByIdAsync(Guid id)
@@ -64,12 +70,12 @@ public class ApprovalFormService : IApprovalFormService
             .Include(u => u.ApprovalForms)
             .FirstOrDefaultAsync(u => u.Id == _authContext.GetUserId());
 
-        if(user!.ApprovalForms?.Any(f => f.State == ApprovalFormState.Pending) ?? false)
+        if(user!.ApprovalForms?.Any(f => f.State is ApprovalFormState.Pending or ApprovalFormState.Approved) ?? false)
             return Result<ApprovalForm>.ErrorResult(new Error
             {
                 HttpCode = StatusCodes.Status422UnprocessableEntity,
                 Title = "Submit Failed",
-                Detail = "User already has a pending form."
+                Detail = "User already has a pending/approved form."
             });
 
         var uploads = new List<Upload>();
@@ -122,12 +128,37 @@ public class ApprovalFormService : IApprovalFormService
 
         if (request.Trigger == ApprovalFormTrigger.Approve)
         {
-            if(!_workflowContext.ApprovalFormWorkflow.ApproveForm(form))
-                return Result<ApprovalForm>.StateErrorResult();
+            var transaction = await _databaseContext.Database.BeginTransactionAsync();
 
-            form.UpdatedBy = _authContext.GetUserId();
-            await _databaseContext.SaveChangesAsync();
-            return Result<ApprovalForm>.SuccessResult(form, StatusCodes.Status200OK);
+            try
+            {
+                if (!_workflowContext.ApprovalFormWorkflow.ApproveForm(form))
+                {
+                    await transaction.RollbackAsync();
+                    return Result<ApprovalForm>.StateErrorResult();
+                }
+
+                form.UpdatedBy = _authContext.GetUserId();
+                await _databaseContext.SaveChangesAsync();
+
+                var roleUpdate = await _userService.UpdateUserRoleAsync(form.UserId, Roles.Producer);
+
+                if (!roleUpdate.IsSuccess())
+                {
+                    await transaction.RollbackAsync();
+                    return Result<ApprovalForm>.ErrorResult(roleUpdate.Error!);
+                }
+
+                await _producerService.CreateProducerAsync(form);
+
+                await transaction.CommitAsync();
+                return Result<ApprovalForm>.SuccessResult(form, StatusCodes.Status200OK);
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         if(!_workflowContext.ApprovalFormWorkflow.DeclineForm(form))
@@ -138,7 +169,7 @@ public class ApprovalFormService : IApprovalFormService
         return Result<ApprovalForm>.SuccessResult(form, StatusCodes.Status200OK);
     }
 
-    public async Task<Result<ApprovalForm>> UpdateFormAsync(Guid id, SubmitFormRequest request)
+    public async Task<Result<ApprovalForm>> UpdateFormAsync(SubmitFormRequest request)
     {
         var uploads = new List<Upload>();
 
@@ -158,7 +189,7 @@ public class ApprovalFormService : IApprovalFormService
         var form = await _databaseContext.ApprovalForms
             .Include(f => f.Uploads)
             .Include(f => f.User)
-            .FirstOrDefaultAsync(f => f.Id == id && f.UserId == _authContext.GetUserId() && f.State == ApprovalFormState.Pending);
+            .FirstOrDefaultAsync(f => f.UserId == _authContext.GetUserId() && f.State == ApprovalFormState.Pending);
 
         if(form is null)
             return Result<ApprovalForm>.NotFoundResult();

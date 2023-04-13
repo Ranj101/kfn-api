@@ -31,7 +31,7 @@ public class ProducersController : KfnControllerBase
     }
 
     [HttpGet("pages/{id:guid}")]
-    public async Task<IActionResult> GetProfileAsync(Guid id)
+    public async Task<IActionResult> GetPageAsync(Guid id)
     {
         var producer = await _service.GetByIdAsync(id, activeOnly:true);
 
@@ -58,8 +58,15 @@ public class ProducersController : KfnControllerBase
             : Ok(producer.ToProducerResponse(_cloudService));
     }
 
-    // Create Producer
-    // Update Producer
-    // Deactivate Producer
-    // Leave a review for a producer
+    [HttpPatch("{id:guid}")]
+    public async Task<IActionResult> UpdateProducerStateAsync(Guid id, [FromBody] UpdateProducerStateRequest request)
+    {
+        var result = await _service.UpdateProducerStateAsync(id, request);
+
+        return result.IsSuccess()
+            ? SuccessResponse(result.Value!.ToProducerListResponse(), result.HttpCode)
+            : ErrorResponse(result.Error!);
+    }
+
+    // TODO: Leave a review for a producer
 }

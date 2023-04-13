@@ -11,4 +11,5 @@ public interface IUserService
     Task<PaginatedList<User>> GetAllUsersAsync(GetAllUsersRequest request);
     Task<User?> EnrollUserAsync(string id);
     Task<Result<User>> UpdateUserStateAsync(Guid id, UpdateUserStateRequest request);
+    Task<Result<User>> UpdateUserRoleAsync(Guid id, string role, bool remove = false, bool allowInactiveUser = false);
 }

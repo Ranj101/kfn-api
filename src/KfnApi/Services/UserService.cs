@@ -145,6 +145,46 @@ public class UserService : IUserService
         return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
     }
 
+    public async Task<Result<User>> UpdateUserRoleAsync(Guid id, string role, bool remove = false, bool allowInactiveUser = false)
+    {
+        var user = await _databaseContext.Users.FirstOrDefaultAsync(u =>
+            u.Id == id && (allowInactiveUser || u.State == UserState.Active));
+
+        if (user is null)
+            return Result<User>.ErrorResult(new Error
+            {
+                HttpCode = StatusCodes.Status422UnprocessableEntity,
+                Title = "Role Update Failed",
+                Detail = "Associated user was not found or is inactive."
+            });
+
+        if (remove)
+        {
+            if (!user.Roles.Remove(role))
+                return Result<User>.ErrorResult(new Error
+                {
+                    HttpCode = StatusCodes.Status422UnprocessableEntity,
+                    Title = "Role Update Failed",
+                    Detail = "Failed to remove role from list"
+                });
+        }
+        else
+        {
+            if(user.Roles.Contains(role))
+                return Result<User>.ErrorResult(new Error
+                {
+                    HttpCode = StatusCodes.Status422UnprocessableEntity,
+                    Title = "Role Update Failed",
+                    Detail = "Failed to add role to list"
+                });
+
+            user.Roles.Add(role);
+        }
+
+        await _databaseContext.SaveChangesAsync();
+        return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
+    }
+
     private async Task UpsertCacheAsync(User user)
     {
         await _cache.SetAsync(GetKey(user.IdentityId), user);

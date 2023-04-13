@@ -1,5 +1,6 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.DTOs.Requests;
+using KfnApi.Helpers.Authorization;
 using KfnApi.Helpers.Database;
 using KfnApi.Helpers.Extensions;
 using KfnApi.Models.Common;
@@ -19,10 +20,16 @@ public class ProducerService : IProducerService
         { SortProducerBy.ClosingTime, new SortBy<Producer, TimeOnly>(x => x.ClosingTime) }
     };
 
+    private readonly IAuthContext _authContext;
+    private readonly IUserService _userService;
+    private readonly WorkflowContext _workflowContext;
     private readonly DatabaseContext _databaseContext;
 
-    public ProducerService(DatabaseContext databaseContext)
+    public ProducerService(DatabaseContext databaseContext, IAuthContext authContext, WorkflowContext workflowContext, IUserService userService)
     {
+        _authContext = authContext;
+        _userService = userService;
+        _workflowContext = workflowContext;
         _databaseContext = databaseContext;
     }
 
@@ -31,6 +38,7 @@ public class ProducerService : IProducerService
         return await _databaseContext.Producers
             .Include(p => p.User)
             .Include(p => p.Products)
+            .Include(p => p.Uploads)
             .FirstOrDefaultAsync(p => p.Id == id && (!activeOnly || p.State == ProducerState.Active));
     }
 
@@ -54,5 +62,124 @@ public class ProducerService : IProducerService
         var paginated = await PaginatedList<Producer>.CreateAsync(producers, request.PageIndex, request.PageSize);
 
         return paginated;
+    }
+
+    public async Task CreateProducerAsync(ApprovalForm form)
+    {
+        var producer = new Producer
+        {
+            Id = Guid.NewGuid(),
+            UserId = form.UserId,
+            Name = form.ProducerName,
+            Locations = form.Locations,
+            OpeningTime = form.OpeningTime,
+            ClosingTime = form.ClosingTime,
+            State = ProducerState.Active,
+            CreatedBy = form.UpdatedBy!.Value
+        };
+
+        await _databaseContext.Producers.AddAsync(producer);
+        await _databaseContext.SaveChangesAsync();
+    }
+
+    public async Task<Result<Producer>> UpdateProducerAsync(UpdateProducerRequest request)
+    {
+        var uploads = new List<Upload>();
+
+        foreach (var key in request.Uploads)
+        {
+            uploads = await TryAddUploadAsync(uploads, key);
+        }
+
+        if (uploads.Count != request.Uploads.Count)
+            return Result<Producer>.ErrorResult(new Error
+            {
+                HttpCode = StatusCodes.Status400BadRequest,
+                Title = "Update Failed",
+                Detail = "List contains invalid upload."
+            });
+
+        var producer = await _databaseContext.Producers
+            .Include(p => p.Uploads)
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.UserId == _authContext.GetUserId() && p.State == ProducerState.Active);
+
+        if(producer is null)
+            return Result<Producer>.NotFoundResult();
+
+        var openingTime = new TimeOnly(request.OpeningTime.Hour, request.OpeningTime.Minute);
+        var closingTime = new TimeOnly(request.ClosingTime.Hour, request.ClosingTime.Minute);
+
+        producer.Locations = request.Locations;
+        producer.OpeningTime = openingTime;
+        producer.ClosingTime = closingTime;
+        producer.Uploads = uploads;
+        producer.UpdatedBy = _authContext.GetUserId();
+
+        await _databaseContext.SaveChangesAsync();
+        return Result<Producer>.SuccessResult(producer, StatusCodes.Status200OK);
+    }
+
+    public async Task<Result<Producer>> UpdateProducerStateAsync(Guid id, UpdateProducerStateRequest request)
+    {
+        var producer = await _databaseContext.Producers.FirstOrDefaultAsync(p => p.Id == id);
+
+        if (producer is null)
+            return Result<Producer>.NotFoundResult();
+
+        var transaction = await _databaseContext.Database.BeginTransactionAsync();
+
+        if (request.Trigger == ProducerTrigger.Deactivate)
+        {
+            if (!_workflowContext.ProducerWorkflow.DeactivateProducer(producer))
+            {
+                await transaction.RollbackAsync();
+                return Result<Producer>.StateErrorResult();
+            }
+
+            producer.UpdatedBy = _authContext.GetUserId();
+            await _databaseContext.SaveChangesAsync();
+
+            var removeRole = await _userService.UpdateUserRoleAsync(producer.UserId, Roles.Producer, remove:true, allowInactiveUser:true);
+
+            if (!removeRole.IsSuccess())
+            {
+                await transaction.RollbackAsync();
+                return Result<Producer>.ErrorResult(removeRole.Error!);
+            }
+
+            await transaction.CommitAsync();
+            return Result<Producer>.SuccessResult(producer, StatusCodes.Status200OK);
+        }
+
+        if (!_workflowContext.ProducerWorkflow.ReactivateProducer(producer))
+        {
+            await transaction.RollbackAsync();
+            return Result<Producer>.StateErrorResult();
+        }
+
+        producer.UpdatedBy = _authContext.GetUserId();
+        await _databaseContext.SaveChangesAsync();
+
+        var addRole = await _userService.UpdateUserRoleAsync(producer.UserId, Roles.Producer);
+
+        if (!addRole.IsSuccess())
+        {
+            await transaction.RollbackAsync();
+            return Result<Producer>.ErrorResult(addRole.Error!);
+        }
+
+        await transaction.CommitAsync();
+        return Result<Producer>.SuccessResult(producer, StatusCodes.Status200OK);
+    }
+
+    private async Task<List<Upload>> TryAddUploadAsync(List<Upload> uploads, Guid key)
+    {
+        var upload = await _databaseContext.Uploads.FirstOrDefaultAsync(u => u.Key == key);
+
+        if(upload is not null)
+            uploads.Add(upload);
+
+        return uploads;
     }
 }

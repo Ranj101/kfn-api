@@ -14,13 +14,15 @@ public class SelfController : KfnControllerBase
 {
     private readonly ISelfService _selfService;
     private readonly IApprovalFormService _formService;
+    private readonly IProducerService _producerService;
     private readonly ICloudStorageService _cloudService;
 
-    public SelfController(ISelfService selfService, IApprovalFormService formService, ICloudStorageService cloudService)
+    public SelfController(ISelfService selfService, IApprovalFormService formService, IProducerService producerService, ICloudStorageService cloudService)
     {
         _selfService = selfService;
         _formService = formService;
         _cloudService = cloudService;
+        _producerService = producerService;
     }
 
     [HttpGet]
@@ -44,13 +46,23 @@ public class SelfController : KfnControllerBase
             : ErrorResponse(result.Error!);
     }
 
-    [HttpPut("forms/{id:guid}")]
-    public async Task<IActionResult> UpdateFormAsync(Guid id, [FromBody] SubmitFormRequest request)
+    [HttpPut("form")]
+    public async Task<IActionResult> UpdateFormAsync([FromBody] SubmitFormRequest request)
     {
-        var result = await _formService.UpdateFormAsync(id, request);
+        var result = await _formService.UpdateFormAsync(request);
 
         return result.IsSuccess()
             ? SuccessResponse(result.Value!.ToFormResponse(_cloudService), result.HttpCode)
+            : ErrorResponse(result.Error!);
+    }
+
+    [HttpPut("producer")]
+    public async Task<IActionResult> UpdateProducerAsync([FromBody] UpdateProducerRequest request)
+    {
+        var result = await _producerService.UpdateProducerAsync(request);
+
+        return result.IsSuccess()
+            ? SuccessResponse(result.Value!.ToProducerPageResponse(_cloudService), result.HttpCode)
             : ErrorResponse(result.Error!);
     }
 }
