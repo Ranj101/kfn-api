@@ -15,8 +15,8 @@ public sealed class ApprovalFormWorkflow : IWorkflow<ApprovalFormState, Approval
         ConfigureMachine();
     }
 
-    public bool ApproveForm(ApprovalForm form) => Fire(ApprovalFormTrigger.Approve, form);
-    public bool DeclineForm(ApprovalForm form) => Fire(ApprovalFormTrigger.Decline, form);
+    public bool ApproveForm(ApprovalForm form, out ApprovalFormState? destination) => Fire(ApprovalFormTrigger.Approve, form, out destination);
+    public bool DeclineForm(ApprovalForm form, out ApprovalFormState? destination) => Fire(ApprovalFormTrigger.Decline, form, out destination);
 
     public List<ApprovalFormState> NextPermittedStates(ApprovalForm form)
     {
@@ -25,15 +25,17 @@ public sealed class ApprovalFormWorkflow : IWorkflow<ApprovalFormState, Approval
             : new List<ApprovalFormState>();
     }
 
-    private bool Fire(ApprovalFormTrigger trigger, ApprovalForm form)
+    private bool Fire(ApprovalFormTrigger trigger, ApprovalForm form, out ApprovalFormState? destination)
     {
+        destination = null;
+
         if(!WorkflowExtensions.GetConfiguration(_machine, form, out var configuration))
             return false;
 
-        if(!WorkflowExtensions.GetDestination(configuration!, trigger, out var destination))
+        if(!WorkflowExtensions.GetDestination(configuration!, trigger, out var result))
             return false;
 
-        form.State = destination;
+        destination = result;
 
         return true;
     }

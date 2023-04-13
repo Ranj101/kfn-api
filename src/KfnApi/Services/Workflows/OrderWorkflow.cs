@@ -15,13 +15,13 @@ public sealed class OrderWorkflow : IWorkflow<OrderState, Order>
         ConfigureMachine();
     }
 
-    public bool FailOrder(Order order) => Fire(OrderTrigger.Fail, order);
-    public bool CancelOrder(Order order) => Fire(OrderTrigger.Cancel, order);
-    public bool ExpireOrder(Order order) => Fire(OrderTrigger.Expire, order);
-    public bool ApproveOrder(Order order) => Fire(OrderTrigger.Approve, order);
-    public bool DeclineOrder(Order order) => Fire(OrderTrigger.Decline, order);
-    public bool ConcludeOrder(Order order) =>  Fire(OrderTrigger.Conclude, order);
-    public bool TerminateOrder(Order order) => Fire(OrderTrigger.Terminate, order);
+    public bool FailOrder(Order order, out OrderState? destination) => Fire(OrderTrigger.Fail, order, out destination);
+    public bool CancelOrder(Order order, out OrderState? destination) => Fire(OrderTrigger.Cancel, order, out destination);
+    public bool ExpireOrder(Order order, out OrderState? destination) => Fire(OrderTrigger.Expire, order, out destination);
+    public bool ApproveOrder(Order order, out OrderState? destination) => Fire(OrderTrigger.Approve, order, out destination);
+    public bool DeclineOrder(Order order, out OrderState? destination) => Fire(OrderTrigger.Decline, order, out destination);
+    public bool ConcludeOrder(Order order, out OrderState? destination) =>  Fire(OrderTrigger.Conclude, order, out destination);
+    public bool TerminateOrder(Order order, out OrderState? destination) => Fire(OrderTrigger.Terminate, order, out destination);
 
     public List<OrderState> NextPermittedStates(Order order)
     {
@@ -30,15 +30,17 @@ public sealed class OrderWorkflow : IWorkflow<OrderState, Order>
             : new List<OrderState>();
     }
 
-    private bool Fire(OrderTrigger trigger, Order order)
+    private bool Fire(OrderTrigger trigger, Order order, out OrderState? destination)
     {
+        destination = null;
+
         if(!WorkflowExtensions.GetConfiguration(_machine, order, out var configuration))
             return false;
 
-        if(!WorkflowExtensions.GetDestination(configuration!, trigger, out var destination))
+        if(!WorkflowExtensions.GetDestination(configuration!, trigger, out var result))
             return false;
 
-        order.State = destination;
+        destination = result;
 
         return true;
     }

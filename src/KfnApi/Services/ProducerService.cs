@@ -1,6 +1,5 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.DTOs.Requests;
-using KfnApi.Helpers.Authorization;
 using KfnApi.Helpers.Database;
 using KfnApi.Helpers.Extensions;
 using KfnApi.Models.Common;
@@ -21,15 +20,11 @@ public class ProducerService : IProducerService
     };
 
     private readonly IAuthContext _authContext;
-    private readonly IUserService _userService;
-    private readonly WorkflowContext _workflowContext;
     private readonly DatabaseContext _databaseContext;
 
-    public ProducerService(DatabaseContext databaseContext, IAuthContext authContext, WorkflowContext workflowContext, IUserService userService)
+    public ProducerService(DatabaseContext databaseContext, IAuthContext authContext)
     {
         _authContext = authContext;
-        _userService = userService;
-        _workflowContext = workflowContext;
         _databaseContext = databaseContext;
     }
 
@@ -117,59 +112,6 @@ public class ProducerService : IProducerService
         producer.UpdatedBy = _authContext.GetUserId();
 
         await _databaseContext.SaveChangesAsync();
-        return Result<Producer>.SuccessResult(producer, StatusCodes.Status200OK);
-    }
-
-    public async Task<Result<Producer>> UpdateProducerStateAsync(Guid id, UpdateProducerStateRequest request)
-    {
-        var producer = await _databaseContext.Producers.FirstOrDefaultAsync(p => p.Id == id);
-
-        if (producer is null)
-            return Result<Producer>.NotFoundResult();
-
-        var transaction = await _databaseContext.Database.BeginTransactionAsync();
-
-        if (request.Trigger == ProducerTrigger.Deactivate)
-        {
-            if (!_workflowContext.ProducerWorkflow.DeactivateProducer(producer))
-            {
-                await transaction.RollbackAsync();
-                return Result<Producer>.StateErrorResult();
-            }
-
-            producer.UpdatedBy = _authContext.GetUserId();
-            await _databaseContext.SaveChangesAsync();
-
-            var removeRole = await _userService.UpdateUserRoleAsync(producer.UserId, Roles.Producer, remove:true, allowInactiveUser:true);
-
-            if (!removeRole.IsSuccess())
-            {
-                await transaction.RollbackAsync();
-                return Result<Producer>.ErrorResult(removeRole.Error!);
-            }
-
-            await transaction.CommitAsync();
-            return Result<Producer>.SuccessResult(producer, StatusCodes.Status200OK);
-        }
-
-        if (!_workflowContext.ProducerWorkflow.ReactivateProducer(producer))
-        {
-            await transaction.RollbackAsync();
-            return Result<Producer>.StateErrorResult();
-        }
-
-        producer.UpdatedBy = _authContext.GetUserId();
-        await _databaseContext.SaveChangesAsync();
-
-        var addRole = await _userService.UpdateUserRoleAsync(producer.UserId, Roles.Producer);
-
-        if (!addRole.IsSuccess())
-        {
-            await transaction.RollbackAsync();
-            return Result<Producer>.ErrorResult(addRole.Error!);
-        }
-
-        await transaction.CommitAsync();
         return Result<Producer>.SuccessResult(producer, StatusCodes.Status200OK);
     }
 

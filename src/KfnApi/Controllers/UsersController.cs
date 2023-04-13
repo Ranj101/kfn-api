@@ -13,12 +13,14 @@ namespace KfnApi.Controllers;
 public class UsersController : KfnControllerBase
 {
     private readonly IUserService _userService;
+    private readonly IWorkflowService _workflowService;
     private readonly ICloudStorageService _cloudService;
 
-    public UsersController(IUserService userService, ICloudStorageService cloudService)
+    public UsersController(IUserService userService, ICloudStorageService cloudService, IWorkflowService workflowService)
     {
         _userService = userService;
         _cloudService = cloudService;
+        _workflowService = workflowService;
     }
 
     [HttpGet("profiles")]
@@ -61,7 +63,7 @@ public class UsersController : KfnControllerBase
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> UpdateUserStateAsync(Guid id, [FromBody] UpdateUserStateRequest request)
     {
-        var result = await _userService.UpdateUserStateAsync(id, request);
+        var result = await _workflowService.UpdateUserStateAsync(id, request);
 
         return result.IsSuccess()
             ? SuccessResponse(result.Value!.ToUserListResponse(_cloudService), result.HttpCode)

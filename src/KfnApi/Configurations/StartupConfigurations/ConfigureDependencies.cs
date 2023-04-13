@@ -15,6 +15,7 @@ public partial class StartupConfigurations
         services.AddScoped<IUploadService, UploadService>();
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IProducerService, ProducerService>();
+        services.AddScoped<IWorkflowService, WorkflowService>();
         services.AddScoped<IRemoteUserService, RemoteUserService>();
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IApprovalFormService, ApprovalFormService>();

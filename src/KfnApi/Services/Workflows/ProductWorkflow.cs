@@ -15,8 +15,8 @@ public sealed class ProductWorkflow : IWorkflow<ProductState, Product>
         ConfigureMachine();
     }
 
-    public bool MakeAvailable(Product product) => Fire(ProductTrigger.MakeAvailable, product);
-    public bool MakeUnavailable(Product product) => Fire(ProductTrigger.MakeUnavailable, product);
+    public bool MakeAvailable(Product product, out ProductState? destination) => Fire(ProductTrigger.MakeAvailable, product, out destination);
+    public bool MakeUnavailable(Product product, out ProductState? destination) => Fire(ProductTrigger.MakeUnavailable, product, out destination);
 
     public List<ProductState> NextPermittedStates(Product product)
     {
@@ -25,15 +25,17 @@ public sealed class ProductWorkflow : IWorkflow<ProductState, Product>
             : new List<ProductState>();
     }
 
-    private bool Fire(ProductTrigger trigger, Product product)
+    private bool Fire(ProductTrigger trigger, Product product, out ProductState? destination)
     {
+        destination = null;
+
         if(!WorkflowExtensions.GetConfiguration(_machine, product, out var configuration))
             return false;
 
-        if(!WorkflowExtensions.GetDestination(configuration!, trigger, out var destination))
+        if(!WorkflowExtensions.GetDestination(configuration!, trigger, out var result))
             return false;
 
-        product.State = destination;
+        destination = result;
 
         return true;
     }

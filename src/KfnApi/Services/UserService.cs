@@ -23,17 +23,12 @@ public class UserService : IUserService
 
     private readonly IFusionCache _cache;
     private readonly IRemoteUserService _users;
-    private readonly IAuthContext _authContext;
-    private readonly WorkflowContext _workflowContext;
     private readonly DatabaseContext _databaseContext;
 
-    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users, WorkflowContext workflowContext,
-        IAuthContext authContext)
+    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users)
     {
         _cache = cache;
         _users = users;
-        _authContext = authContext;
-        _workflowContext = workflowContext;
         _databaseContext = databaseContext;
     }
 
@@ -117,34 +112,6 @@ public class UserService : IUserService
         return entry.Entity;
     }
 
-    public async Task<Result<User>> UpdateUserStateAsync(Guid id, UpdateUserStateRequest request)
-    {
-        var user = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == id);
-
-        if (user is null)
-            return Result<User>.NotFoundResult();
-
-        if (request.Trigger == UserTrigger.Deactivate)
-        {
-            //TODO: Block user at Auth0 level
-            if (!_workflowContext.UserWorkflow.DeactivateUser(user))
-                return Result<User>.StateErrorResult();
-
-            user.UpdatedBy = _authContext.GetUserId();
-            await _databaseContext.SaveChangesAsync();
-            await RemoveCacheAsync(user);
-            return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
-        }
-
-        if (!_workflowContext.UserWorkflow.ReactivateUser(user))
-            return Result<User>.StateErrorResult();
-
-        user.UpdatedBy = _authContext.GetUserId();
-        await _databaseContext.SaveChangesAsync();
-        await RemoveCacheAsync(user);
-        return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
-    }
-
     public async Task<Result<User>> UpdateUserRoleAsync(Guid id, string role, bool remove = false, bool allowInactiveUser = false)
     {
         var user = await _databaseContext.Users.FirstOrDefaultAsync(u =>
@@ -188,11 +155,6 @@ public class UserService : IUserService
     private async Task UpsertCacheAsync(User user)
     {
         await _cache.SetAsync(GetKey(user.IdentityId), user);
-    }
-
-    private async Task RemoveCacheAsync(User user)
-    {
-        await _cache.RemoveAsync(GetKey(user.IdentityId));
     }
 
     private static string GetKey(in string id)

@@ -10,5 +10,4 @@ public interface IProducerService
     Task<PaginatedList<Producer>> GetAllProducersAsync(GetAllProducersRequest request);
     Task CreateProducerAsync(ApprovalForm form);
     Task<Result<Producer>> UpdateProducerAsync(UpdateProducerRequest request);
-    Task<Result<Producer>> UpdateProducerStateAsync(Guid id, UpdateProducerStateRequest request);
 }

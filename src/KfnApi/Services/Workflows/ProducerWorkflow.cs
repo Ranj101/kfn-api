@@ -15,8 +15,8 @@ public sealed class ProducerWorkflow : IWorkflow<ProducerState, Producer>
         ConfigureMachine();
     }
 
-    public bool ReactivateProducer(Producer producer) => Fire(ProducerTrigger.Reactivate, producer);
-    public bool DeactivateProducer(Producer producer) => Fire(ProducerTrigger.Deactivate, producer);
+    public bool ReactivateProducer(Producer producer, out ProducerState? destination) => Fire(ProducerTrigger.Reactivate, producer, out destination);
+    public bool DeactivateProducer(Producer producer, out ProducerState? destination) => Fire(ProducerTrigger.Deactivate, producer, out destination);
 
     public List<ProducerState> NextPermittedStates(Producer producer)
     {
@@ -25,15 +25,17 @@ public sealed class ProducerWorkflow : IWorkflow<ProducerState, Producer>
             : new List<ProducerState>();
     }
 
-    private bool Fire(ProducerTrigger trigger, Producer producer)
+    private bool Fire(ProducerTrigger trigger, Producer producer, out ProducerState? destination)
     {
+        destination = null;
+
         if(!WorkflowExtensions.GetConfiguration(_machine, producer, out var configuration))
             return false;
 
-        if(!WorkflowExtensions.GetDestination(configuration!, trigger, out var destination))
+        if(!WorkflowExtensions.GetDestination(configuration!, trigger, out var result))
             return false;
 
-        producer.State = destination;
+        destination = result;
 
         return true;
     }

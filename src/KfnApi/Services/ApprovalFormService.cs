@@ -1,6 +1,5 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.DTOs.Requests;
-using KfnApi.Helpers.Authorization;
 using KfnApi.Helpers.Database;
 using KfnApi.Helpers.Extensions;
 using KfnApi.Models.Common;
@@ -19,19 +18,12 @@ public class ApprovalFormService : IApprovalFormService
     };
 
     private readonly IAuthContext _authContext;
-    private readonly IUserService _userService;
-    private readonly WorkflowContext _workflowContext;
     private readonly DatabaseContext _databaseContext;
-    private readonly IProducerService _producerService;
 
-    public ApprovalFormService(DatabaseContext databaseContext, WorkflowContext workflowContext, IAuthContext authContext,
-        IProducerService producerService, IUserService userService)
+    public ApprovalFormService(DatabaseContext databaseContext, IAuthContext authContext)
     {
         _authContext = authContext;
-        _userService = userService;
-        _workflowContext = workflowContext;
         _databaseContext = databaseContext;
-        _producerService = producerService;
     }
 
     public async Task<ApprovalForm?> GetByIdAsync(Guid id)
@@ -114,59 +106,6 @@ public class ApprovalFormService : IApprovalFormService
         await _databaseContext.SaveChangesAsync();
 
         return Result<ApprovalForm>.SuccessResult(entry.Entity, StatusCodes.Status201Created);
-    }
-
-    public async Task<Result<ApprovalForm>> UpdateFormStateAsync(Guid id, UpdateFormStateRequest request)
-    {
-        var form = await _databaseContext.ApprovalForms
-            .Include(f => f.Uploads)
-            .Include(f => f.User)
-            .FirstOrDefaultAsync(f => f.Id == id);
-
-        if(form is null)
-            return Result<ApprovalForm>.NotFoundResult();
-
-        if (request.Trigger == ApprovalFormTrigger.Approve)
-        {
-            var transaction = await _databaseContext.Database.BeginTransactionAsync();
-
-            try
-            {
-                if (!_workflowContext.ApprovalFormWorkflow.ApproveForm(form))
-                {
-                    await transaction.RollbackAsync();
-                    return Result<ApprovalForm>.StateErrorResult();
-                }
-
-                form.UpdatedBy = _authContext.GetUserId();
-                await _databaseContext.SaveChangesAsync();
-
-                var roleUpdate = await _userService.UpdateUserRoleAsync(form.UserId, Roles.Producer);
-
-                if (!roleUpdate.IsSuccess())
-                {
-                    await transaction.RollbackAsync();
-                    return Result<ApprovalForm>.ErrorResult(roleUpdate.Error!);
-                }
-
-                await _producerService.CreateProducerAsync(form);
-
-                await transaction.CommitAsync();
-                return Result<ApprovalForm>.SuccessResult(form, StatusCodes.Status200OK);
-            }
-            catch (Exception)
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
-        }
-
-        if(!_workflowContext.ApprovalFormWorkflow.DeclineForm(form))
-            return Result<ApprovalForm>.StateErrorResult();
-
-        form.UpdatedBy = _authContext.GetUserId();
-        await _databaseContext.SaveChangesAsync();
-        return Result<ApprovalForm>.SuccessResult(form, StatusCodes.Status200OK);
     }
 
     public async Task<Result<ApprovalForm>> UpdateFormAsync(SubmitFormRequest request)

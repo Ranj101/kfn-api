@@ -9,6 +9,5 @@ public interface IApprovalFormService
     Task<ApprovalForm?> GetByIdAsync(Guid id);
     Task<PaginatedList<ApprovalForm>> GetAllFormsAsync(GetAllFormsRequest request);
     Task<Result<ApprovalForm>> CreateFormAsync(SubmitFormRequest request);
-    Task<Result<ApprovalForm>> UpdateFormStateAsync(Guid id, UpdateFormStateRequest request);
     Task<Result<ApprovalForm>> UpdateFormAsync(SubmitFormRequest request);
 }

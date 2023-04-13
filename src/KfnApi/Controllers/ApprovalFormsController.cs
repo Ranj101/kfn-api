@@ -13,12 +13,14 @@ namespace KfnApi.Controllers;
 public class ApprovalFormsController : KfnControllerBase
 {
     private readonly IApprovalFormService _service;
+    private readonly IWorkflowService _workflowService;
     private readonly ICloudStorageService _cloudService;
 
-    public ApprovalFormsController(IApprovalFormService service, ICloudStorageService cloudService)
+    public ApprovalFormsController(IApprovalFormService service, ICloudStorageService cloudService, IWorkflowService workflowService)
     {
         _service = service;
         _cloudService = cloudService;
+        _workflowService = workflowService;
     }
 
     [HttpGet]
@@ -53,7 +55,7 @@ public class ApprovalFormsController : KfnControllerBase
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> UpdateFormStateAsync(Guid id, [FromBody] UpdateFormStateRequest request)
     {
-        var result = await _service.UpdateFormStateAsync(id, request);
+        var result = await _workflowService.UpdateFormStateAsync(id, request);
 
         return result.IsSuccess()
             ? SuccessResponse(result.Value!.ToFormResponse(_cloudService), result.HttpCode)

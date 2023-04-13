@@ -13,12 +13,14 @@ namespace KfnApi.Controllers;
 public class ProducersController : KfnControllerBase
 {
     private readonly IProducerService _service;
+    private readonly IWorkflowService _workflowService;
     private readonly ICloudStorageService _cloudService;
 
-    public ProducersController(IProducerService service, ICloudStorageService cloudService)
+    public ProducersController(IProducerService service, ICloudStorageService cloudService, IWorkflowService workflowService)
     {
         _service = service;
         _cloudService = cloudService;
+        _workflowService = workflowService;
     }
 
     [HttpGet("pages")]
@@ -61,7 +63,7 @@ public class ProducersController : KfnControllerBase
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> UpdateProducerStateAsync(Guid id, [FromBody] UpdateProducerStateRequest request)
     {
-        var result = await _service.UpdateProducerStateAsync(id, request);
+        var result = await _workflowService.UpdateProducerStateAsync(id, request);
 
         return result.IsSuccess()
             ? SuccessResponse(result.Value!.ToProducerListResponse(), result.HttpCode)
