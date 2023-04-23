@@ -17,6 +17,7 @@ public sealed class ProductWorkflow : IWorkflow<ProductState, Product>
 
     public bool MakeAvailable(Product product, out ProductState? destination) => Fire(ProductTrigger.MakeAvailable, product, out destination);
     public bool MakeUnavailable(Product product, out ProductState? destination) => Fire(ProductTrigger.MakeUnavailable, product, out destination);
+    public bool MarkAsModified(Product product, out ProductState? destination) => Fire(ProductTrigger.MarkAsModified, product, out destination);
 
     public List<ProductState> NextPermittedStates(Product product)
     {
@@ -46,7 +47,8 @@ public sealed class ProductWorkflow : IWorkflow<ProductState, Product>
         {
             Transitions = new()
             {
-                { ProductTrigger.MakeUnavailable, ProductState.Unavailable }
+                { ProductTrigger.MakeUnavailable, ProductState.Unavailable },
+                { ProductTrigger.MarkAsModified , ProductState.Modified }
             }
         });
 
@@ -54,7 +56,8 @@ public sealed class ProductWorkflow : IWorkflow<ProductState, Product>
         {
             Transitions = new()
             {
-                { ProductTrigger.MakeAvailable, ProductState.Available }
+                { ProductTrigger.MakeAvailable, ProductState.Available },
+                { ProductTrigger.MarkAsModified , ProductState.Modified }
             }
         });
     }

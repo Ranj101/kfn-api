@@ -16,16 +16,18 @@ public class WorkflowService : IWorkflowService
     private readonly IFusionCache _cache;
     private readonly IAuthContext _authContext;
     private readonly IUserService _userService;
+    private readonly IProductService _productService;
     private readonly WorkflowContext _workflowContext;
     private readonly DatabaseContext _databaseContext;
     private readonly IProducerService _producerService;
 
     public WorkflowService(WorkflowContext workflowContext, DatabaseContext databaseContext, IAuthContext authContext,
-        IFusionCache cache, IUserService userService, IProducerService producerService)
+        IFusionCache cache, IUserService userService, IProducerService producerService, IProductService productService)
     {
         _cache = cache;
         _authContext = authContext;
         _userService = userService;
+        _productService = productService;
         _workflowContext = workflowContext;
         _databaseContext = databaseContext;
         _producerService = producerService;
@@ -54,9 +56,9 @@ public class WorkflowService : IWorkflowService
             return Result<Producer>.NotFoundResult();
 
         if (request.Trigger == ProducerTrigger.Deactivate)
-            return await DeactivateProducer(producer);
+            return await DeactivateProducerAsync(producer);
 
-        return await ReactivateProducer(producer);
+        return await ReactivateProducerAsync(producer);
     }
 
     public async Task<Result<ApprovalForm>> UpdateFormStateAsync(Guid id, UpdateFormStateRequest request)
@@ -70,9 +72,35 @@ public class WorkflowService : IWorkflowService
             return Result<ApprovalForm>.NotFoundResult();
 
         if (request.Trigger == ApprovalFormTrigger.Decline)
-            return await DeclineForm(form);
+            return await DeclineFormAsync(form);
 
-        return await ApproveForm(form);
+        return await ApproveFormAsync(form);
+    }
+
+    public async Task<Result<Product>> UpdateProductStateAsync(Guid id, UpdateProductStateRequest request)
+    {
+        var product = await _databaseContext.Products
+            .Include(p => p.Prices)
+            .Include(p => p.Producer)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if(product is null)
+            return Result<Product>.NotFoundResult();
+
+        if (request.Trigger == ExposedProductTrigger.MakeUnavailable)
+            return await MakeUnavailableAsync(product);
+
+        return await MakeAvailableAsync(product);
+    }
+
+    public async Task<Result<Product>> SafeProductUpdateAsync(Product product, CreateProductRequest request)
+    {
+        return await MarkAsModifiedAndReplicateAsync(product, request);
+    }
+
+    public async Task<Result<Product>> SafeProductDeleteAsync(Product product)
+    {
+        return await MarkAsModifiedAsync(product);
     }
 
     private async Task<Result<User>> DeactivateUserAsync(User user)
@@ -91,7 +119,7 @@ public class WorkflowService : IWorkflowService
 
             if (user.Producer is not null && user.Producer.State == ProducerState.Active)
             {
-                var result = await DeactivateProducer(user.Producer, transaction);
+                var result = await DeactivateProducerAsync(user.Producer, transaction);
 
                 if (!result.IsSuccess())
                 {
@@ -127,7 +155,7 @@ public class WorkflowService : IWorkflowService
         return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
     }
 
-    private async Task<Result<Producer>> DeactivateProducer(Producer producer, IDbContextTransaction? transaction = null)
+    private async Task<Result<Producer>> DeactivateProducerAsync(Producer producer, IDbContextTransaction? transaction = null)
     {
         if (!_workflowContext.ProducerWorkflow.DeactivateProducer(producer, out var destination))
             return Result<Producer>.StateErrorResult();
@@ -159,7 +187,7 @@ public class WorkflowService : IWorkflowService
         }
     }
 
-    private async Task<Result<Producer>> ReactivateProducer(Producer producer)
+    private async Task<Result<Producer>> ReactivateProducerAsync(Producer producer)
     {
         if (!_workflowContext.ProducerWorkflow.ReactivateProducer(producer, out var destination))
             return Result<Producer>.StateErrorResult();
@@ -191,7 +219,7 @@ public class WorkflowService : IWorkflowService
         }
     }
 
-    private async Task<Result<ApprovalForm>> ApproveForm(ApprovalForm form)
+    private async Task<Result<ApprovalForm>> ApproveFormAsync(ApprovalForm form)
     {
         if (!_workflowContext.ApprovalFormWorkflow.ApproveForm(form, out var destination))
             return Result<ApprovalForm>.StateErrorResult();
@@ -225,7 +253,7 @@ public class WorkflowService : IWorkflowService
         }
     }
 
-    private async Task<Result<ApprovalForm>> DeclineForm(ApprovalForm form)
+    private async Task<Result<ApprovalForm>> DeclineFormAsync(ApprovalForm form)
     {
         if (!_workflowContext.ApprovalFormWorkflow.DeclineForm(form, out var destination))
             return Result<ApprovalForm>.StateErrorResult();
@@ -236,6 +264,77 @@ public class WorkflowService : IWorkflowService
         await _databaseContext.SaveChangesAsync();
 
         return Result<ApprovalForm>.SuccessResult(form, StatusCodes.Status200OK);
+    }
+
+    private async Task<Result<Product>> MakeUnavailableAsync(Product product)
+    {
+        if (!_workflowContext.ProductWorkflow.MakeUnavailable(product, out var destination))
+            return Result<Product>.StateErrorResult();
+
+        product.State = destination!.Value;
+        product.UpdatedBy = _authContext.GetUserId();
+
+        await _databaseContext.SaveChangesAsync();
+
+        return Result<Product>.SuccessResult(product, StatusCodes.Status200OK);
+    }
+
+    private async Task<Result<Product>> MakeAvailableAsync(Product product)
+    {
+        if (!_workflowContext.ProductWorkflow.MakeAvailable(product, out var destination))
+            return Result<Product>.StateErrorResult();
+
+        product.State = destination!.Value;
+        product.UpdatedBy = _authContext.GetUserId();
+
+        await _databaseContext.SaveChangesAsync();
+
+        return Result<Product>.SuccessResult(product, StatusCodes.Status200OK);
+    }
+
+    private async Task<Result<Product>> MarkAsModifiedAsync(Product product)
+    {
+        if (!_workflowContext.ProductWorkflow.MarkAsModified(product, out var destination))
+            return Result<Product>.StateErrorResult();
+
+        product.State = destination!.Value;
+        product.UpdatedBy = _authContext.GetUserId();
+
+        await _databaseContext.SaveChangesAsync();
+
+        return Result<Product>.SuccessResult(product, StatusCodes.Status200OK);
+    }
+
+    private async Task<Result<Product>> MarkAsModifiedAndReplicateAsync(Product product, CreateProductRequest request)
+    {
+        if (!_workflowContext.ProductWorkflow.MarkAsModified(product, out var destination))
+            return Result<Product>.StateErrorResult();
+
+        var transaction = await _databaseContext.Database.BeginTransactionAsync();
+
+        try
+        {
+            product.State = destination!.Value;
+            product.UpdatedBy = _authContext.GetUserId();
+
+            await _databaseContext.SaveChangesAsync();
+
+            var result = await _productService.CreateProductAsync(request);
+
+            if (!result.IsSuccess())
+            {
+                await transaction.RollbackAsync();
+                return Result<Product>.ErrorResult(result.Error!);
+            }
+
+            await transaction.CommitAsync();
+            return Result<Product>.SuccessResult(result.Value!, StatusCodes.Status200OK);
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     private async Task RemoveCacheAsync(User user)

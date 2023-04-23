@@ -274,6 +274,59 @@ public static class Mappers
         };
     }
 
+    public static PriceByWeightResponse ToPriceByWeightResponse(this PriceByWeight price)
+    {
+        return new PriceByWeightResponse
+        {
+            Value = price.Value,
+            Weight = price.Weight
+        };
+    }
+
+    public static ProductResponse ToProductResponse(this Product product, ICloudStorageService service)
+    {
+        if(product.Prices is null)
+            throw new ArgumentException("null parameter mapping", nameof(product.Prices));
+
+        if(product.Producer is null)
+            throw new ArgumentException("null parameter mapping", nameof(product.Producer));
+
+        var pictureUrl = GetPreSignedUrl(product.Picture, service);
+
+        return new ProductResponse
+        {
+            Id = product.Id,
+            Name = product.Name,
+            ProducerName = product.Producer.Name,
+            Picture = pictureUrl!,
+            State = product.State,
+            CreatedAt = product.CreatedAt,
+            UpdatedAt = product.UpdatedAt,
+            PricesByWeight = product.Prices.Select(x => x.ToPriceByWeightResponse()).ToList()
+        };
+    }
+
+    public static ProductListResponse ToProductListResponse(this Product product, ICloudStorageService service)
+    {
+        if(product.Prices is null)
+            throw new ArgumentException("null parameter mapping", nameof(product.Prices));
+
+        if(product.Producer is null)
+            throw new ArgumentException("null parameter mapping", nameof(product.Producer));
+
+        var pictureUrl = GetPreSignedUrl(product.Picture, service);
+
+        return new ProductListResponse
+        {
+            Id = product.Id,
+            Name = product.Name,
+            ProducerName = product.Producer.Name,
+            Picture = pictureUrl!,
+            State = product.State,
+            PricesByWeight = product.Prices.Select(x => x.ToPriceByWeightResponse()).ToList()
+        };
+    }
+
     private static string? GetPreSignedUrl(Guid? key, ICloudStorageService service)
     {
         return key.HasValue ? service.GetPreSignedUrl(key.Value) : null;
