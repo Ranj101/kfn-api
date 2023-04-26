@@ -19,10 +19,16 @@ public class RoleMap : IRoleMap
         // Skip the `none` permission
         var allPermissions = Enum.GetValues<Permission>()[1..].ToArray();
 
+        var producerPermissions = new []
+        {
+            Permission.getOrderById
+        };
+
         return new Dictionary<string, Permission[]>
         {
             { Roles.SuperAdmin, allPermissions },
-            { Roles.SystemAdmin, allPermissions }
+            { Roles.SystemAdmin, allPermissions },
+            { Roles.Producer, producerPermissions }
         };
     }
 }

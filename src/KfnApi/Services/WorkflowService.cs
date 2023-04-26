@@ -103,6 +103,61 @@ public class WorkflowService : IWorkflowService
         return await MarkAsModifiedAsync(product);
     }
 
+    public async Task ExpireOrdersAsync(List<Order> orders)
+    {
+        foreach (var order in orders)
+        {
+            await ExpireOrderAsync(order);
+        }
+    }
+
+    public async Task<Result<Order>> UpdateOrderStateAsync(Guid id, UpdateOrderStateRequest request)
+    {
+        var order = await _databaseContext.Orders
+            .Include(o => o.Products)!.ThenInclude(p => p.Prices)
+            .Include(o => o.Products)!.ThenInclude(p => p.Producer)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if(order is null)
+            return Result<Order>.NotFoundResult();
+
+        if (request.Trigger is ExposedOrderTrigger.Approve or ExposedOrderTrigger.Decline or ExposedOrderTrigger.Terminate)
+            return await ProducerUpdateOrderStateAsync(order, request.Trigger);
+
+        return await CustomerUpdateOrderStateAsync(order, request.Trigger);
+    }
+
+    private async Task<Result<Order>> ProducerUpdateOrderStateAsync(Order order, ExposedOrderTrigger trigger)
+    {
+        var producer = await _databaseContext.Producers.FirstOrDefaultAsync(p =>
+            p.Id == order.ProducerId && p.UserId == _authContext.GetUserId() && p.State == ProducerState.Active);
+
+        if (producer is null)
+            return Result<Order>.NotFoundResult();
+
+        if (trigger == ExposedOrderTrigger.Approve)
+            return await ApproveOrderAsync(order);
+
+        if (trigger == ExposedOrderTrigger.Decline)
+            return await DeclineOrderAsync(order);
+
+        return await TerminateOrderAsync(order);
+    }
+
+    private async Task<Result<Order>> CustomerUpdateOrderStateAsync(Order order, ExposedOrderTrigger trigger)
+    {
+        if (order.UserId != _authContext.GetUserId())
+            return Result<Order>.NotFoundResult();
+
+        if (trigger == ExposedOrderTrigger.Fail)
+            return await FailOrderAsync(order);
+
+        if (trigger == ExposedOrderTrigger.Cancel)
+            return await CancelOrderAsync(order);
+
+        return await ConcludeOrderAsync(order);
+    }
+
     private async Task<Result<User>> DeactivateUserAsync(User user)
     {
         if (!_workflowContext.UserWorkflow.DeactivateUser(user, out var destination))
@@ -335,6 +390,97 @@ public class WorkflowService : IWorkflowService
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    private async Task<Result<Order>> FailOrderAsync(Order order)
+    {
+        if (!_workflowContext.OrderWorkflow.FailOrder(order, out var destination))
+            return Result<Order>.StateErrorResult();
+
+        order.State = destination!.Value;
+        order.UpdatedBy = _authContext.GetUserId();
+
+        await _databaseContext.SaveChangesAsync();
+
+        return Result<Order>.SuccessResult(order, StatusCodes.Status200OK);
+    }
+
+    private async Task<Result<Order>> CancelOrderAsync(Order order)
+    {
+        if (!_workflowContext.OrderWorkflow.CancelOrder(order, out var destination))
+            return Result<Order>.StateErrorResult();
+
+        order.State = destination!.Value;
+        order.UpdatedBy = _authContext.GetUserId();
+
+        await _databaseContext.SaveChangesAsync();
+
+        return Result<Order>.SuccessResult(order, StatusCodes.Status200OK);
+    }
+
+    private async Task<Result<Order>> ExpireOrderAsync(Order order)
+    {
+        if (!_workflowContext.OrderWorkflow.ExpireOrder(order, out var destination))
+            return Result<Order>.StateErrorResult();
+
+        order.State = destination!.Value;
+        order.UpdatedBy = _authContext.GetUserId();
+
+        await _databaseContext.SaveChangesAsync();
+
+        return Result<Order>.SuccessResult(order, StatusCodes.Status200OK);
+    }
+
+    private async Task<Result<Order>> ApproveOrderAsync(Order order)
+    {
+        if (!_workflowContext.OrderWorkflow.ApproveOrder(order, out var destination))
+            return Result<Order>.StateErrorResult();
+
+        order.State = destination!.Value;
+        order.UpdatedBy = _authContext.GetUserId();
+
+        await _databaseContext.SaveChangesAsync();
+
+        return Result<Order>.SuccessResult(order, StatusCodes.Status200OK);
+    }
+
+    private async Task<Result<Order>> DeclineOrderAsync(Order order)
+    {
+        if (!_workflowContext.OrderWorkflow.DeclineOrder(order, out var destination))
+            return Result<Order>.StateErrorResult();
+
+        order.State = destination!.Value;
+        order.UpdatedBy = _authContext.GetUserId();
+
+        await _databaseContext.SaveChangesAsync();
+
+        return Result<Order>.SuccessResult(order, StatusCodes.Status200OK);
+    }
+
+    private async Task<Result<Order>> ConcludeOrderAsync(Order order)
+    {
+        if (!_workflowContext.OrderWorkflow.ConcludeOrder(order, out var destination))
+            return Result<Order>.StateErrorResult();
+
+        order.State = destination!.Value;
+        order.UpdatedBy = _authContext.GetUserId();
+
+        await _databaseContext.SaveChangesAsync();
+
+        return Result<Order>.SuccessResult(order, StatusCodes.Status200OK);
+    }
+
+    private async Task<Result<Order>> TerminateOrderAsync(Order order)
+    {
+        if (!_workflowContext.OrderWorkflow.TerminateOrder(order, out var destination))
+            return Result<Order>.StateErrorResult();
+
+        order.State = destination!.Value;
+        order.UpdatedBy = _authContext.GetUserId();
+
+        await _databaseContext.SaveChangesAsync();
+
+        return Result<Order>.SuccessResult(order, StatusCodes.Status200OK);
     }
 
     private async Task RemoveCacheAsync(User user)

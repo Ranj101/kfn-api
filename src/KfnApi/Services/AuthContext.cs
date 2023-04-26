@@ -11,6 +11,7 @@ public class AuthContext : IAuthContext
     private User? _user;
     private bool _isSuperAdmin;
     private bool _isSystemAdmin;
+    private bool _isProducer;
     private HashSet<Permission> _permissions = new();
 
     public AuthContext(IRoleMap roleMap)
@@ -30,6 +31,9 @@ public class AuthContext : IAuthContext
     public bool IsAdmin()
         => _isSuperAdmin || _isSystemAdmin;
 
+    public bool IsProducer()
+        => _isProducer;
+
     public bool IsSuperAdmin()
         => _isSuperAdmin;
 
@@ -45,6 +49,7 @@ public class AuthContext : IAuthContext
 
         _isSuperAdmin = user.Roles.Contains(Roles.SuperAdmin);
         _isSystemAdmin = user.Roles.Contains(Roles.SystemAdmin);
+        _isProducer = user.Roles.Contains(Roles.Producer);
 
         _permissions = _roleMap.GetRoleDefinitions()
             .Where(kvp => user.Roles.Contains(kvp.Key))

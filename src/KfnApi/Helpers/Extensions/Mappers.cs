@@ -278,6 +278,7 @@ public static class Mappers
     {
         return new PriceByWeightResponse
         {
+            Id = price.Id,
             Value = price.Value,
             Weight = price.Weight
         };
@@ -324,6 +325,49 @@ public static class Mappers
             Picture = pictureUrl!,
             State = product.State,
             PricesByWeight = product.Prices.Select(x => x.ToPriceByWeightResponse()).ToList()
+        };
+    }
+
+    public static OrderResponse ToOrderResponse(this Order order, ICloudStorageService service)
+    {
+        if(order.Products is null)
+            throw new ArgumentException("null parameter mapping", nameof(order.Products));
+
+        return new OrderResponse
+        {
+            Id = order.Id,
+            UserId = order.UserId,
+            ProducerId = order.ProducerId,
+            TotalPrice = order.TotalPrice,
+            Location = order.Location,
+            PickupTime = order.PickupTime,
+            State = order.State,
+            CreatedBy = order.CreatedBy,
+            UpdatedBy = order.UpdatedBy,
+            CreatedAt = order.CreatedAt,
+            UpdatedAt = order.UpdatedAt,
+            Products = order.Products.Select(p => p.ToProductListResponse(service)).ToList()
+        };
+    }
+
+    public static OrderListResponse ToOrderListResponse(this Order order)
+    {
+        return new OrderListResponse
+        {
+            Id = order.Id,
+            TotalPrice = order.TotalPrice,
+            Location = order.Location,
+            State = order.State
+        };
+    }
+
+    public static OrderBasicListResponse ToOrderBasicListResponse(this Order order)
+    {
+        return new OrderBasicListResponse
+        {
+            Id = order.Id,
+            Location = order.Location,
+            State = order.State
         };
     }
 

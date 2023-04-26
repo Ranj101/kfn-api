@@ -12,4 +12,6 @@ public interface IWorkflowService
     Task<Result<Product>> UpdateProductStateAsync(Guid id, UpdateProductStateRequest request);
     Task<Result<Product>> SafeProductUpdateAsync(Product product, CreateProductRequest request);
     Task<Result<Product>> SafeProductDeleteAsync(Product product);
+    Task ExpireOrdersAsync(List<Order> orders);
+    Task<Result<Order>> UpdateOrderStateAsync(Guid id, UpdateOrderStateRequest request);
 }

@@ -37,6 +37,7 @@ public class ProducerService : IProducerService
             .FirstOrDefaultAsync(p => p.Id == id && (!activeOnly || p.State == ProducerState.Active));
     }
 
+    // TODO: Allow producer to be searched by name
     public async Task<PaginatedList<Producer>> GetAllProducersAsync(GetAllProducersRequest request)
     {
         var stateFilter = request.FilterByState is null;

@@ -9,6 +9,7 @@ public interface IAuthContext
     User GetUser();
     Guid GetUserId();
     bool IsAdmin();
+    bool IsProducer();
     bool IsSuperAdmin();
     bool IsSystemAdmin();
     HashSet<Permission> GetPermissions();

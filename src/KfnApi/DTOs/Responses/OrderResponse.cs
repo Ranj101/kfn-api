@@ -1,15 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using KfnApi.Abstractions;
-using KfnApi.Models.Enums.Workflows;
+﻿using KfnApi.Models.Enums.Workflows;
 
-namespace KfnApi.Models.Entities;
+namespace KfnApi.DTOs.Responses;
 
-public sealed record Order : IAuditable, IStateful<OrderState>
+public sealed record OrderResponse
 {
     public required Guid Id { get; set; }
-    [ForeignKey(nameof(User))]
     public required Guid UserId { get; set; }
-    [ForeignKey(nameof(Producer))]
     public required Guid ProducerId { get; set; }
     public required double TotalPrice { get; set; }
     public required string Location { get; set; }
@@ -18,11 +14,8 @@ public sealed record Order : IAuditable, IStateful<OrderState>
 
     public required Guid CreatedBy { get; init; }
     public Guid? UpdatedBy { get; set; }
-    public DateTime CreatedAt { get; init; }
+    public required DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; set; }
 
-    // Database Relations
-    public User? User { get; set; }
-    public Producer? Producer { get; set; }
-    public List<Product>? Products { get; set; }
+    public required List<ProductListResponse> Products { get; set; }
 }
