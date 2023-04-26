@@ -1,6 +1,8 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.DTOs.Requests;
 using KfnApi.Helpers;
+using KfnApi.Helpers.Authorization;
+using KfnApi.Helpers.Authorization.Policy;
 using KfnApi.Helpers.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +26,7 @@ public class ProducersController : KfnControllerBase
     }
 
     [HttpGet("pages")]
+    [RequirePermission(Permission.GetProducerPages)]
     public async Task<IActionResult> GetPagesAsync([FromQuery] GetAllProducerPagesRequest pagesRequest)
     {
         var request = new GetAllProducersRequest(pagesRequest);
@@ -33,6 +36,7 @@ public class ProducersController : KfnControllerBase
     }
 
     [HttpGet("pages/{id:guid}")]
+    [RequirePermission(Permission.GetProducerPageById)]
     public async Task<IActionResult> GetPageAsync(Guid id)
     {
         var producer = await _service.GetByIdAsync(id, activeOnly:true);
@@ -43,6 +47,7 @@ public class ProducersController : KfnControllerBase
     }
 
     [HttpGet]
+    [RequirePermission(Permission.GetProducers)]
     public async Task<IActionResult> GetProducersAsync([FromQuery] GetAllProducersRequest request)
     {
         var paginated = await _service.GetAllProducersAsync(request);
@@ -51,6 +56,7 @@ public class ProducersController : KfnControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [RequirePermission(Permission.GetProducerById)]
     public async Task<IActionResult> GetProducerAsync(Guid id)
     {
         var producer = await _service.GetByIdAsync(id);
@@ -61,6 +67,7 @@ public class ProducersController : KfnControllerBase
     }
 
     [HttpPatch("{id:guid}")]
+    [RequirePermission(Permission.UpdateProducerState)]
     public async Task<IActionResult> UpdateProducerStateAsync(Guid id, [FromBody] UpdateProducerStateRequest request)
     {
         var result = await _workflowService.UpdateProducerStateAsync(id, request);

@@ -1,6 +1,8 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.DTOs.Requests;
 using KfnApi.Helpers;
+using KfnApi.Helpers.Authorization;
+using KfnApi.Helpers.Authorization.Policy;
 using KfnApi.Helpers.Extensions;
 using KfnApi.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -25,6 +27,7 @@ public class ProductsController : KfnControllerBase
     }
 
     [HttpGet]
+    [RequirePermission(Permission.GetProducts)]
     public async Task<IActionResult> GetProductsAsync([FromQuery] GetProductsRequest request)
     {
         var paginated = await _service.GetProductsAsync(request);
@@ -33,6 +36,7 @@ public class ProductsController : KfnControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [RequirePermission(Permission.GetProductById)]
     public async Task<IActionResult> GetProductAsync(Guid id)
     {
         var product = await _service.GetByIdAsync(id);
@@ -43,6 +47,7 @@ public class ProductsController : KfnControllerBase
     }
 
     [HttpPost]
+    [RequirePermission(Permission.CreateProduct)]
     public async Task<IActionResult> CreateProductAsync([FromBody] CreateProductRequest request)
     {
         var result = await _service.CreateProductAsync(request);
@@ -53,6 +58,7 @@ public class ProductsController : KfnControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [RequirePermission(Permission.UpdateProduct)]
     public async Task<IActionResult> UpdateProductAsync(Guid id, CreateProductRequest request)
     {
         var result = await _service.ResolveUpdateCriticality(id, request);
@@ -79,6 +85,7 @@ public class ProductsController : KfnControllerBase
     }
 
     [HttpPatch("{id:guid}")]
+    [RequirePermission(Permission.UpdateProductState)]
     public async Task<IActionResult> UpdateProductStateAsync(Guid id, [FromBody] UpdateProductStateRequest request)
     {
         var result = await _workflowService.UpdateProductStateAsync(id, request);
@@ -89,6 +96,7 @@ public class ProductsController : KfnControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [RequirePermission(Permission.DeleteProduct)]
     public async Task<IActionResult> DeleteProductAsync(Guid id)
     {
         var result = await _service.DeleteProductAsync(id);

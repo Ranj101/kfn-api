@@ -1,6 +1,8 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.DTOs.Requests;
 using KfnApi.Helpers;
+using KfnApi.Helpers.Authorization;
+using KfnApi.Helpers.Authorization.Policy;
 using KfnApi.Helpers.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +26,7 @@ public class OrdersController : KfnControllerBase
     }
 
     [HttpGet("basic")]
+    [RequirePermission(Permission.GetBasicOrders)]
     public async Task<IActionResult> GetBasicOrdersAsync([FromQuery] GetAllBasicOrdersRequest basicRequest)
     {
         var request = new GetAllOrdersRequest(basicRequest);
@@ -33,6 +36,7 @@ public class OrdersController : KfnControllerBase
     }
 
     [HttpGet]
+    [RequirePermission(Permission.GetOrders)]
     public async Task<IActionResult> GetOrdersAsync([FromQuery] GetAllOrdersRequest request)
     {
         var paginated = await _service.GetOrdersAsync(request);
@@ -41,6 +45,7 @@ public class OrdersController : KfnControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [RequirePermission(Permission.GetOrderById)]
     public async Task<IActionResult> GetOrderAsync(Guid id)
     {
         var order = await _service.GetByIdAsync(id);
@@ -51,6 +56,7 @@ public class OrdersController : KfnControllerBase
     }
 
     [HttpPost]
+    [RequirePermission(Permission.SubmitOrder)]
     public async Task<IActionResult> SubmitOrderAsync(SubmitOrderRequest request)
     {
         var result = await _service.SubmitOrderAsync(request);
@@ -61,6 +67,7 @@ public class OrdersController : KfnControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [RequirePermission(Permission.UpdateOrder)]
     public async Task<IActionResult> UpdateOrderAsync(Guid id, UpdateOrderRequest request)
     {
         var result = await _service.UpdateOrderAsync(id, request);
@@ -71,6 +78,7 @@ public class OrdersController : KfnControllerBase
     }
 
     [HttpPatch("{id:guid}")]
+    [RequirePermission(Permission.UpdateOrderState)]
     public async Task<IActionResult> UpdateOrderStateAsync(Guid id, [FromBody] UpdateOrderStateRequest request)
     {
         var result = await _workflowService.UpdateOrderStateAsync(id, request);

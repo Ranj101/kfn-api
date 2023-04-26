@@ -26,6 +26,7 @@ public class ApprovalFormService : IApprovalFormService
         _databaseContext = databaseContext;
     }
 
+    // TODO: Fix permission issue
     public async Task<ApprovalForm?> GetByIdAsync(Guid id)
     {
         return await _databaseContext.ApprovalForms

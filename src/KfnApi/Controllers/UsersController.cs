@@ -1,6 +1,8 @@
 using KfnApi.Abstractions;
 using KfnApi.DTOs.Requests;
 using KfnApi.Helpers;
+using KfnApi.Helpers.Authorization;
+using KfnApi.Helpers.Authorization.Policy;
 using KfnApi.Helpers.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +26,7 @@ public class UsersController : KfnControllerBase
     }
 
     [HttpGet("profiles")]
+    [RequirePermission(Permission.GetUserProfiles)]
     public async Task<IActionResult> GetProfilesAsync([FromQuery] GetAllProfilesRequest profilesRequest)
     {
         var request = new GetAllUsersRequest(profilesRequest);
@@ -33,6 +36,7 @@ public class UsersController : KfnControllerBase
     }
 
     [HttpGet("profiles/{id:guid}")]
+    [RequirePermission(Permission.GetUserProfileById)]
     public async Task<IActionResult> GetProfileAsync(Guid id)
     {
         var user = await _userService.GetByIdAsync(id, activeOnly:true);
@@ -43,6 +47,7 @@ public class UsersController : KfnControllerBase
     }
 
     [HttpGet]
+    [RequirePermission(Permission.GetUsers)]
     public async Task<IActionResult> GetUsersAsync([FromQuery] GetAllUsersRequest request)
     {
         var paginated = await _userService.GetAllUsersAsync(request);
@@ -51,6 +56,7 @@ public class UsersController : KfnControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [RequirePermission(Permission.GetUserById)]
     public async Task<IActionResult> GetUserAsync(Guid id)
     {
         var user = await _userService.GetByIdAsync(id);
@@ -61,6 +67,7 @@ public class UsersController : KfnControllerBase
     }
 
     [HttpPatch("{id:guid}")]
+    [RequirePermission(Permission.UpdateUserState)]
     public async Task<IActionResult> UpdateUserStateAsync(Guid id, [FromBody] UpdateUserStateRequest request)
     {
         var result = await _workflowService.UpdateUserStateAsync(id, request);

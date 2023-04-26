@@ -17,12 +17,12 @@ public class PermissionService : IPermissionService
         if (!_authContext.HasUser())
             return false;
 
-        if (permissionToAccess is Permission.none)
+        if (permissionToAccess is Permission.None)
             return true;
 
         var currentPermissions = _authContext.GetPermissions();
 
-        return currentPermissions.Contains(permissionToAccess) || currentPermissions.Contains(Permission.all);
+        return currentPermissions.Contains(permissionToAccess);
     }
 
     public bool HasAnyPermission(HashSet<Permission> permissionsToAccess)
@@ -30,7 +30,7 @@ public class PermissionService : IPermissionService
         if (!_authContext.HasUser())
             return false;
 
-        if (permissionsToAccess.Count == 1  && permissionsToAccess.First() is Permission.none)
+        if (permissionsToAccess.Count == 1  && permissionsToAccess.First() is Permission.None)
             return true;
 
         var currentPermissions = _authContext.GetPermissions();
@@ -38,6 +38,6 @@ public class PermissionService : IPermissionService
         var hasRequiredPermission = currentPermissions.Any(currentPermission => permissionsToAccess
             .Any(permissionToAccess => permissionToAccess == currentPermission));
 
-        return hasRequiredPermission || currentPermissions.Contains(Permission.all);
+        return hasRequiredPermission;
     }
 }

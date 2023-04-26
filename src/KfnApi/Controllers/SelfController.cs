@@ -1,6 +1,8 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.DTOs.Requests;
 using KfnApi.Helpers;
+using KfnApi.Helpers.Authorization;
+using KfnApi.Helpers.Authorization.Policy;
 using KfnApi.Helpers.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +28,7 @@ public class SelfController : KfnControllerBase
     }
 
     [HttpGet]
+    [RequirePermission(Permission.GetSelf)]
     public async Task<IActionResult> GetSelfAsync()
     {
         var user = await _selfService.GetSelfAsync();
@@ -37,6 +40,7 @@ public class SelfController : KfnControllerBase
     }
 
     [HttpPatch]
+    [RequirePermission(Permission.UpdateSelf)]
     public async Task<IActionResult> UpdateSelfAsync([FromBody] UpdateSelfRequest request)
     {
         var result = await _selfService.UpdateSelfAsync(request);
@@ -47,6 +51,7 @@ public class SelfController : KfnControllerBase
     }
 
     [HttpPut("form")]
+    [RequirePermission(Permission.UpdateForm)]
     public async Task<IActionResult> UpdateFormAsync([FromBody] SubmitFormRequest request)
     {
         var result = await _formService.UpdateFormAsync(request);
@@ -57,6 +62,7 @@ public class SelfController : KfnControllerBase
     }
 
     [HttpPut("producer")]
+    [RequirePermission(Permission.UpdateProducer)]
     public async Task<IActionResult> UpdateProducerAsync([FromBody] UpdateProducerRequest request)
     {
         var result = await _producerService.UpdateProducerAsync(request);

@@ -1,6 +1,8 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.DTOs.Requests;
 using KfnApi.Helpers;
+using KfnApi.Helpers.Authorization;
+using KfnApi.Helpers.Authorization.Policy;
 using KfnApi.Helpers.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +26,7 @@ public class ApprovalFormsController : KfnControllerBase
     }
 
     [HttpGet]
+    [RequirePermission(Permission.GetForms)]
     public async Task<IActionResult> GetFormsAsync([FromQuery] GetAllFormsRequest request)
     {
         var paginated = await _service.GetAllFormsAsync(request);
@@ -33,6 +36,7 @@ public class ApprovalFormsController : KfnControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [RequirePermission(Permission.GetFormById)]
     public async Task<IActionResult> GetFormAsync(Guid id)
     {
         var form = await _service.GetByIdAsync(id);
@@ -43,6 +47,7 @@ public class ApprovalFormsController : KfnControllerBase
     }
 
     [HttpPost]
+    [RequirePermission(Permission.SubmitForm)]
     public async Task<IActionResult> SubmitFormAsync([FromBody] SubmitFormRequest request)
     {
         var result = await _service.CreateFormAsync(request);
@@ -53,6 +58,7 @@ public class ApprovalFormsController : KfnControllerBase
     }
 
     [HttpPatch("{id:guid}")]
+    [RequirePermission(Permission.UpdateFormState)]
     public async Task<IActionResult> UpdateFormStateAsync(Guid id, [FromBody] UpdateFormStateRequest request)
     {
         var result = await _workflowService.UpdateFormStateAsync(id, request);

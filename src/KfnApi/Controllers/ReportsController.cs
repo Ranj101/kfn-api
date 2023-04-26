@@ -1,6 +1,8 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.DTOs.Requests;
 using KfnApi.Helpers;
+using KfnApi.Helpers.Authorization;
+using KfnApi.Helpers.Authorization.Policy;
 using KfnApi.Helpers.Extensions;
 using KfnApi.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +29,7 @@ public class ReportsController : KfnControllerBase
     }
 
     [HttpGet]
+    [RequirePermission(Permission.GetReports)]
     public async Task<IActionResult> GetReportsAsync([FromQuery] GetAllReportsRequest request)
     {
         if (request.AffiliatedEntityId is not null)
@@ -68,6 +71,7 @@ public class ReportsController : KfnControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [RequirePermission(Permission.GetReportById)]
     public async Task<IActionResult> GetReportAsync(Guid id)
     {
         var userReport = await _reportService.GetUserReportByIdAsync(id);
@@ -83,6 +87,7 @@ public class ReportsController : KfnControllerBase
     }
 
     [HttpPost("{id:guid}")]
+    [RequirePermission(Permission.SubmitReport)]
     public async Task<IActionResult> SubmitReportAsync(Guid id, [FromBody] SubmitReportRequest request)
     {
         var user = await _userService.GetByIdAsync(id, activeOnly:true);
