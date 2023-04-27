@@ -1,4 +1,5 @@
 ﻿using KfnApi.Abstractions;
+using KfnApi.DTOs.Requests;
 using KfnApi.Helpers.Authorization;
 using KfnApi.Helpers.Database;
 using KfnApi.Helpers.Extensions;
@@ -6,7 +7,6 @@ using KfnApi.Models.Common;
 using KfnApi.Models.Entities;
 using KfnApi.Models.Enums;
 using KfnApi.Models.Enums.Workflows;
-using KfnApi.Models.Requests;
 using Microsoft.EntityFrameworkCore;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -14,23 +14,21 @@ namespace KfnApi.Services;
 
 public class UserService : IUserService
 {
-    private static readonly Dictionary<SortBy, ISortBy> SortFunctions = new ()
-        {
-            { SortBy.DateCreated, new SortBy<User, DateTime>(x => x.CreatedAt) },
-            { SortBy.FirstName, new SortBy<User, string>(x => x.FirstName) },
-            { SortBy.LastName, new SortBy<User, string>(x => x.LastName) }
-        };
+    private static readonly Dictionary<SortUserBy, ISortBy> SortFunctions = new ()
+    {
+        { SortUserBy.DateCreated, new SortBy<User, DateTime>(x => x.CreatedAt) },
+        { SortUserBy.FirstName, new SortBy<User, string>(x => x.FirstName) },
+        { SortUserBy.LastName, new SortBy<User, string>(x => x.LastName) }
+    };
 
     private readonly IFusionCache _cache;
     private readonly IRemoteUserService _users;
-    private readonly WorkflowContext _workflowContext;
     private readonly DatabaseContext _databaseContext;
 
-    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users, WorkflowContext workflowContext)
+    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users)
     {
         _cache = cache;
         _users = users;
-        _workflowContext = workflowContext;
         _databaseContext = databaseContext;
     }
 
@@ -50,26 +48,24 @@ public class UserService : IUserService
         return dbUser;
     }
 
-    public async Task<User?> GetByIdAsync(Guid id)
+    public async Task<User?> GetByIdAsync(Guid id, bool activeOnly = false)
     {
-        var cachedUser = await _cache.GetOrDefaultAsync<User>(GetKey(id.ToString()));
-
-        if (cachedUser is not null)
-            return cachedUser;
-
-        var dbUser = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == id);
-
-        if (dbUser is null)
-            return null;
-
-        await UpsertCacheAsync(dbUser);
-        return dbUser;
+        return await _databaseContext.Users
+            .Include(u => u.Producer)
+            .Include(u => u.AbuseReports)
+            .FirstOrDefaultAsync(u => u.Id == id && (!activeOnly || u.State == UserState.Active));
     }
 
     public async Task<PaginatedList<User>> GetAllUsersAsync(GetAllUsersRequest request)
     {
+        var stateFilter = request.FilterByState is null;
+        var emailFilter = request.FilterByEmail is null;
+
         var users = _databaseContext.Users
-            .Where(user => request.SearchByEmail == null || user.Email.ToLower().Contains(request.SearchByEmail!.Trim().ToLower()))
+            .Include(u => u.Producer)
+            .Include(u => u.AbuseReports)
+            .Where(user => (emailFilter || user.Email.ToLower().Contains(request.FilterByEmail!.Trim().ToLower())) &&
+                           (stateFilter || user.State == request.FilterByState))
             .AsQueryable();
 
         users = request.SortDirection == SortDirection.Descending
@@ -116,42 +112,49 @@ public class UserService : IUserService
         return entry.Entity;
     }
 
-    public async Task<Result<User>> UpdateUserState(Guid id, UpdateUserStateRequest request)
+    public async Task<Result<User>> UpdateUserRoleAsync(Guid id, string role, bool remove = false, bool allowInactiveUser = false)
     {
-        var user = await _databaseContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+        var user = await _databaseContext.Users.FirstOrDefaultAsync(u =>
+            u.Id == id && (allowInactiveUser || u.State == UserState.Active));
 
         if (user is null)
-            return Result<User>.NotFoundResult();
+            return Result<User>.ErrorResult(new Error
+            {
+                HttpCode = StatusCodes.Status422UnprocessableEntity,
+                Title = "Role Update Failed",
+                Detail = "Associated user was not found or is inactive."
+            });
 
-        if (request.Trigger == UserTrigger.Deactivate)
+        if (remove)
         {
-            //TODO: Block user at Auth0 level
-            if (!_workflowContext.UserWorkflow.DeactivateUser(user))
-                return Result<User>.StateErrorResult();
+            if (!user.Roles.Remove(role))
+                return Result<User>.ErrorResult(new Error
+                {
+                    HttpCode = StatusCodes.Status422UnprocessableEntity,
+                    Title = "Role Update Failed",
+                    Detail = "Failed to remove role from list"
+                });
+        }
+        else
+        {
+            if(user.Roles.Contains(role))
+                return Result<User>.ErrorResult(new Error
+                {
+                    HttpCode = StatusCodes.Status422UnprocessableEntity,
+                    Title = "Role Update Failed",
+                    Detail = "Failed to add role to list"
+                });
 
-            await _databaseContext.SaveChangesAsync();
-            await RemoveCacheAsync(user);
-            return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
+            user.Roles.Add(role);
         }
 
-        if (!_workflowContext.UserWorkflow.ReactivateUser(user))
-            return Result<User>.StateErrorResult();
-
         await _databaseContext.SaveChangesAsync();
-        await RemoveCacheAsync(user);
         return Result<User>.SuccessResult(user, StatusCodes.Status200OK);
     }
 
     private async Task UpsertCacheAsync(User user)
     {
         await _cache.SetAsync(GetKey(user.IdentityId), user);
-        await _cache.SetAsync(GetKey(user.Id.ToString()), user);
-    }
-
-    private async Task RemoveCacheAsync(User user)
-    {
-        await _cache.RemoveAsync(GetKey(user.IdentityId));
-        await _cache.RemoveAsync(GetKey(user.Id.ToString()));
     }
 
     private static string GetKey(in string id)

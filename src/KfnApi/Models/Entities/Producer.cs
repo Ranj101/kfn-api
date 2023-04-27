@@ -14,16 +14,17 @@ public sealed record Producer : IAuditable, IStateful<ProducerState>
     public required TimeOnly OpeningTime { get; set; }
     public required TimeOnly ClosingTime { get; set; }
     public List<string> Reviews { get; set; } = new();
-    public List<string> AbuseReports { get; set; } = new();
     public required ProducerState State { get; set; }
 
     public required Guid CreatedBy { get; init; }
     public Guid? UpdatedBy { get; set; }
-    public required DateTime CreatedAt { get; init; }
+    public DateTime CreatedAt { get; init; }
     public DateTime? UpdatedAt { get; set; }
 
     // Database Relations
-    public User User { get; set; }
-    public List<Product> Products { get; set; }
-    public List<Order> Orders { get; set; }
+    public User? User { get; set; }
+    public List<Order>? Orders { get; set; }
+    public List<Upload>? Uploads { get; set; }
+    public List<ProducerReport>? AbuseReports { get; set; }
+    public List<Product>? Products { get; set; }
 }

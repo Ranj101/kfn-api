@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using KfnApi.Models.Enums.Workflows;
 
-namespace KfnApi.Models.Requests;
+namespace KfnApi.DTOs.Requests;
 
-public class UpdateUserStateRequest
+public sealed record UpdateUserStateRequest
 {
     [Required]
     [EnumDataType(typeof(UserTrigger))]

@@ -1,4 +1,4 @@
-﻿namespace KfnApi.Models.Responses;
+﻿namespace KfnApi.DTOs.Responses;
 
 public sealed record ProfileResponse
 {
@@ -6,6 +6,8 @@ public sealed record ProfileResponse
     public required string Email { get; set; }
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
+    public required string? CoverPicture { get; set; }
+    public required string? ProfilePicture { get; set; }
     public DateTime CreatedAt { get; set; }
     public List<string> Providers { get; set; } = new();
 }

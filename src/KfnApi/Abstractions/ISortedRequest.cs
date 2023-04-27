@@ -2,8 +2,8 @@
 
 namespace KfnApi.Abstractions;
 
-public interface ISortedRequest
+public interface ISortedRequest<TSortBy> where TSortBy : Enum
 {
-    SortBy SortBy { get; set; }
+    TSortBy SortBy { get; set; }
     SortDirection SortDirection { get; set; }
 }

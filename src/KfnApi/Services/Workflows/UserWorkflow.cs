@@ -15,8 +15,8 @@ public sealed class UserWorkflow : IWorkflow<UserState, User>
         ConfigureMachine();
     }
 
-    public bool ReactivateUser(User user) => Fire(UserTrigger.Reactivate, user);
-    public bool DeactivateUser(User user) => Fire(UserTrigger.Deactivate, user);
+    public bool ReactivateUser(User user, out UserState? destination) => Fire(UserTrigger.Reactivate, user, out destination);
+    public bool DeactivateUser(User user, out UserState? destination) => Fire(UserTrigger.Deactivate, user, out destination);
 
     public List<UserState> NextPermittedStates(User user)
     {
@@ -25,15 +25,17 @@ public sealed class UserWorkflow : IWorkflow<UserState, User>
             : new List<UserState>();
     }
 
-    private bool Fire(UserTrigger trigger, User user)
+    private bool Fire(UserTrigger trigger, User user, out UserState? destination)
     {
+        destination = null;
+
         if(!WorkflowExtensions.GetConfiguration(_machine, user, out var configuration))
             return false;
 
-        if(!WorkflowExtensions.GetDestination(configuration!, trigger, out var destination))
+        if(!WorkflowExtensions.GetDestination(configuration!, trigger, out var result))
             return false;
 
-        user.State = destination;
+        destination = result;
 
         return true;
     }

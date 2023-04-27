@@ -1,6 +1,6 @@
 ﻿namespace KfnApi.Models.Common;
 
-public record AuthUserRole
+public sealed record AuthUserRole
 {
     public required string Id { get; set; }
     public required string Name { get; set; }

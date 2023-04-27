@@ -2,9 +2,9 @@
 using KfnApi.Abstractions;
 using KfnApi.Models.Enums;
 
-namespace KfnApi.Models.Requests;
+namespace KfnApi.DTOs.Requests;
 
-public class GetAllUsersRequest : IPaginatedRequest, ISortedRequest
+public sealed record GetAllProfilesRequest : IPaginatedRequest, ISortedRequest<SortUserBy>
 {
     [Range(1, int.MaxValue)]
     public int PageIndex { get; set; } = 1;
@@ -13,10 +13,11 @@ public class GetAllUsersRequest : IPaginatedRequest, ISortedRequest
     public int PageSize { get; set; } = 10;
 
     [Required]
-    public SortBy SortBy { get; set; }
+    public SortUserBy SortBy { get; set; }
 
     [Required]
+    [EnumDataType(typeof(SortDirection))]
     public SortDirection SortDirection { get; set; }
 
-    public string? SearchByEmail { get; set; }
+    public string? FilterByEmail { get; set; }
 }

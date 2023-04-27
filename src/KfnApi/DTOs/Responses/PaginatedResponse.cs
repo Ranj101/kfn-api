@@ -1,9 +1,9 @@
 ﻿using KfnApi.Abstractions;
 using KfnApi.Models.Common;
 
-namespace KfnApi.Models.Responses;
+namespace KfnApi.DTOs.Responses;
 
-public class PaginatedResponse<T, TMapped> : IPaginatedResponse
+public sealed record PaginatedResponse<T, TMapped> : IPaginatedResponse
 {
     public int Page { get; set; }
     public int Count { get; set; }

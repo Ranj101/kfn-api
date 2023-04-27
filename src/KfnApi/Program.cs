@@ -37,6 +37,7 @@ services.ConfigureSwagger()
 
 services.ConfigureCache(configuration)
         .ConfigureDatabase(configuration)
+        .ConfigureCloudStorage(configuration)
         .ConfigureAuthentication(configuration);
 
 services.AddCors(options =>

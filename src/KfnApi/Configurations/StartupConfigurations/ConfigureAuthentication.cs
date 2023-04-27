@@ -2,6 +2,7 @@
 using KfnApi.Models.Settings;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Logging;
 using Polly;
 using Polly.Extensions.Http;
 
@@ -34,6 +35,9 @@ public static partial class StartupConfigurations
                 options.Audience = authOptions.Audience;
             })
             .AddScheme<AuthenticationSchemeOptions, UserAuthHandler>(Constants.AuthScheme, _ => {});
+
+        //TODO: Remove this later
+        IdentityModelEventSource.ShowPII = true;
 
         return services;
     }

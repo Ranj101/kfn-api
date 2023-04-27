@@ -13,8 +13,8 @@ public class PaginatedList<T> : List<T>
         AddRange(items);
     }
 
-    public int PageSize { get; }
-    public int TotalCount { get; }
+    public int PageSize { get; set; }
+    public int TotalCount { get; set; }
     public int PageIndex { get; set; }
     public int TotalPages { get; set; }
 

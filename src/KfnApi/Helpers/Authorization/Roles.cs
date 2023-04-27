@@ -3,7 +3,8 @@
 public static class Roles
 {
     public const string Customer = "customer";
+    public const string Producer = "producer";
 
-    public const string SuperAdmin = "superadmin";
+    public const string SuperAdmin = "super_admin";
     public const string SystemAdmin = "system_admin";
 }

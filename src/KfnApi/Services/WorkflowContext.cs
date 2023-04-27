@@ -8,7 +8,7 @@ public sealed class WorkflowContext
     public readonly OrderWorkflow OrderWorkflow;
     public readonly ProductWorkflow ProductWorkflow;
     public readonly ProducerWorkflow ProducerWorkflow;
-    public readonly ProducerFormWorkflow ProducerFormWorkflow;
+    public readonly ApprovalFormWorkflow ApprovalFormWorkflow;
 
     public WorkflowContext()
     {
@@ -16,6 +16,6 @@ public sealed class WorkflowContext
         OrderWorkflow = new OrderWorkflow();
         ProductWorkflow = new ProductWorkflow();
         ProducerWorkflow = new ProducerWorkflow();
-        ProducerFormWorkflow = new ProducerFormWorkflow();
+        ApprovalFormWorkflow = new ApprovalFormWorkflow();
     }
 }
