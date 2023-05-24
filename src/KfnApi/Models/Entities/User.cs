@@ -12,7 +12,6 @@ public sealed record User : IAuditable, IStateful<UserState>
     public required string Email { get; set; }
     public Guid? ProfilePicture { get; set; }
     public Guid? CoverPicture { get; set; }
-    public List<string> Providers { get; set; } = new();
     public List<string> Roles { get; set; } = new();
     public required UserState State { get; set; }
 

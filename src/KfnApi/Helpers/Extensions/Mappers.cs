@@ -30,7 +30,6 @@ public static class Mappers
             LastName = user.LastName,
             CoverPicture = coverUrl,
             ProfilePicture = profileUrl,
-            Providers = user.Providers,
             CreatedBy = user.CreatedBy,
             UpdatedBy = user.UpdatedBy,
             CreatedAt = user.CreatedAt,
@@ -56,7 +55,6 @@ public static class Mappers
             LastName = user.LastName,
             CoverPicture = coverUrl,
             ProfilePicture = profileUrl,
-            Providers = user.Providers,
             CreatedBy = user.CreatedBy,
             UpdatedBy = user.UpdatedBy,
             CreatedAt = user.CreatedAt,
@@ -79,7 +77,6 @@ public static class Mappers
             CoverPicture = coverUrl,
             ProfilePicture = profileUrl,
             CreatedAt = user.CreatedAt,
-            Providers = user.Providers
         };
     }
 
@@ -97,7 +94,6 @@ public static class Mappers
             LastName = user.LastName,
             CoverPicture = coverUrl,
             ProfilePicture = profileUrl,
-            Providers = user.Providers,
             CreatedBy = user.CreatedBy,
             UpdatedBy = user.UpdatedBy,
             CreatedAt = user.CreatedAt,

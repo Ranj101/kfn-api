@@ -18,4 +18,13 @@ public static class Constants
             new JsonStringEnumConverter()
         }
     };
+
+    public static class FirebaseUserClaimType
+    {
+        public const string Id = "identity_user_id";
+        public const string Email = "identity_user_email";
+        public const string Username = "identity_username";
+        public const string Picture = "identity_user_picture";
+        public const string EmailVerified = "identity_user_email_verified";
+    }
 }
