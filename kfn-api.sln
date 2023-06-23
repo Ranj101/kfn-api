@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KfnApi", "src\KfnApi\KfnApi.csproj", "{0E6B9B5E-2C1D-4581-AB1A-91427516E7FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "tests\IntegrationTests\IntegrationTests.csproj", "{C21D2CAE-0B39-48E9-88ED-51386A811B2A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "tests\UnitTests\UnitTests.csproj", "{43124EB3-0842-4AA6-AEAC-E429667F6E3E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{0E6B9B5E-2C1D-4581-AB1A-91427516E7FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E6B9B5E-2C1D-4581-AB1A-91427516E7FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E6B9B5E-2C1D-4581-AB1A-91427516E7FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C21D2CAE-0B39-48E9-88ED-51386A811B2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C21D2CAE-0B39-48E9-88ED-51386A811B2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C21D2CAE-0B39-48E9-88ED-51386A811B2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C21D2CAE-0B39-48E9-88ED-51386A811B2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43124EB3-0842-4AA6-AEAC-E429667F6E3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43124EB3-0842-4AA6-AEAC-E429667F6E3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43124EB3-0842-4AA6-AEAC-E429667F6E3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43124EB3-0842-4AA6-AEAC-E429667F6E3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -77,17 +77,11 @@ public class UserService : IUserService
 
     public async Task<User> EnrollUserAsync(FirebaseUser identityUser)
     {
-        var userRoles = new List<string> { Roles.Customer };
-
-        // TODO: add identity provided roles
-        // if (authUser.Roles.Contains("kfn-admin"))
-        userRoles.AddRange(new []{ Roles.SuperAdmin, Roles.SystemAdmin });
-
         var newUserId = Guid.NewGuid();
 
         var newUser = new User
         {
-            Roles = userRoles,
+            Roles = new List<string> { Roles.Customer },
             Id = newUserId,
             ProfilePicture = identityUser.Picture,
             IdentityId = identityUser.Id,

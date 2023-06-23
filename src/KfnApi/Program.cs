@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
+// Run database migrations if --migrate is passed as an argument.
 if (args.Contains("--migrate"))
 {
     builder.Services.ConfigureDatabase(builder.Configuration);
@@ -30,6 +31,7 @@ if (args.Contains("--migrate"))
 services.AddControllers();
 services.AddEndpointsApiExplorer();
 
+// Configure services.
 services.ConfigureSwagger()
         .ConfigureControllers()
         .ConfigureDependencies()
@@ -49,3 +51,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+
+#pragma warning disable CA1050
+public sealed partial class Program { }
