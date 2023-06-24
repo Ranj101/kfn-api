@@ -6,6 +6,8 @@ public sealed record FirebaseOptions
 {
     public const string SectionName = "Firebase";
 
+    public bool UseFirebase { get; set; } = true;
+
     [Required]
     public required string Type { get; set; }
 

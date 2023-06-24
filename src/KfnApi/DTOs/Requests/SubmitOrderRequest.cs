@@ -14,5 +14,6 @@ public sealed record SubmitOrderRequest
     public required DateTime PickupTime { get; set; }
 
     [Required]
+    [MinLength(1)]
     public required List<OrderedProductRequest> Products { get; set; }
 }

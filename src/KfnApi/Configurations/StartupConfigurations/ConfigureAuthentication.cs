@@ -22,19 +22,20 @@ public static partial class StartupConfigurations
 
         var firebaseOptions = configuration.Get<FirebaseOptions>();
 
-        services.AddSingleton(FirebaseApp.Create(new AppOptions
-        {
-            Credential = GoogleCredential.FromJsonParameters(new JsonCredentialParameters
+        if (firebaseOptions!.UseFirebase)
+            services.AddSingleton(FirebaseApp.Create(new AppOptions
             {
-                Type = firebaseOptions!.Type,
-                ProjectId = firebaseOptions.ProjectId,
-                PrivateKeyId = firebaseOptions.PrivateKeyId,
-                PrivateKey = firebaseOptions.PrivateKey,
-                ClientEmail = firebaseOptions.ClientEmail,
-                ClientId = firebaseOptions.ClientId,
-                TokenUrl = firebaseOptions.TokenUri
-            })
-        }));
+                Credential = GoogleCredential.FromJsonParameters(new JsonCredentialParameters
+                {
+                    Type = firebaseOptions!.Type,
+                    ProjectId = firebaseOptions.ProjectId,
+                    PrivateKeyId = firebaseOptions.PrivateKeyId,
+                    PrivateKey = firebaseOptions.PrivateKey,
+                    ClientEmail = firebaseOptions.ClientEmail,
+                    ClientId = firebaseOptions.ClientId,
+                    TokenUrl = firebaseOptions.TokenUri
+                })
+            }));
 
         services
             .AddAuthentication(options =>

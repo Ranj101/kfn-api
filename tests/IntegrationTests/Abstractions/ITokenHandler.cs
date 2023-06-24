@@ -2,5 +2,5 @@
 
 public interface ITokenHandler
 {
-    string GenerateAccessToken(string identityId);
+    string GenerateAccessToken(string identityId, bool isNewUser);
 }

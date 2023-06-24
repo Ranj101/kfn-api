@@ -106,4 +106,16 @@ public class TestApplicationFactory : WebApplicationFactory<Program>
         descriptors.Add(services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<DatabaseContext>)));
         foreach (var descriptor in descriptors.Where(descriptor => descriptor != null)) services.Remove(descriptor!);
     }
+
+    public override ValueTask DisposeAsync()
+    {
+        using (var scope = Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+            dbContext.Database.EnsureDeleted();
+        }
+
+        GC.SuppressFinalize(this);
+        return base.DisposeAsync();
+    }
 }
