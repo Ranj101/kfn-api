@@ -5,13 +5,13 @@ namespace KfnApi.DTOs.Requests;
 public sealed record SubmitOrderRequest
 {
     [Required]
-    public required Guid ProducerId { get; set; }
+    public required Guid? ProducerId { get; set; }
 
     [Required]
     public required string Location { get; set; }
 
     [Required]
-    public required DateTime PickupTime { get; set; }
+    public required DateTime? PickupTime { get; set; }
 
     [Required]
     [MinLength(1)]

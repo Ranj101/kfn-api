@@ -1,4 +1,4 @@
-using Microsoft.Build.Framework;
+using System.ComponentModel.DataAnnotations;
 
 namespace KfnApi.Models.Settings;
 
@@ -26,15 +26,19 @@ public sealed record FirebaseOptions
     [Required]
     public required string ClientId { get; set; }
 
+    [Url]
     [Required]
     public required string AuthUri { get; set; }
 
+    [Url]
     [Required]
     public required string TokenUri { get; set; }
 
+    [Url]
     [Required]
     public required string AuthProviderX509CertUrl { get; set; }
 
+    [Url]
     [Required]
     public required string ClientX509CertUrl { get; set; }
 

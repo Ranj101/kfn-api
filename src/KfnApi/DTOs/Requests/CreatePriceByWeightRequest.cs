@@ -5,10 +5,10 @@ namespace KfnApi.DTOs.Requests;
 public sealed record CreatePriceByWeightRequest
 {
     [Required]
-    [Range(0, double.MaxValue)]
+    [Range(1, double.MaxValue)]
     public required double Value { get; set; }
 
     [Required]
-    [Range(0, double.MaxValue)]
+    [Range(1, double.MaxValue)]
     public required double Weight { get; set; }
 }
