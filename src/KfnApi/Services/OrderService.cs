@@ -83,7 +83,7 @@ public class OrderService : IOrderService
     public async Task<Result<Order>> SubmitOrderAsync(SubmitOrderRequest request)
     {
         var producer = await _databaseContext.Producers.FirstOrDefaultAsync(p =>
-            p.Id == request.ProducerId && p.State == ProducerState.Active);
+            p.Id == request.ProducerId!.Value && p.State == ProducerState.Active);
 
         if (producer is null)
             return Result<Order>.NotFoundResult();
@@ -123,7 +123,7 @@ public class OrderService : IOrderService
             ProducerId = producer.Id,
             TotalPrice = totalPrice,
             Location = request.Location,
-            PickupTime = request.PickupTime,
+            PickupTime = request.PickupTime!.Value,
             State = OrderState.Pending,
             CreatedBy = _authContext.GetUserId(),
             Products = products

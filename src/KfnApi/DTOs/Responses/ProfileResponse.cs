@@ -9,5 +9,4 @@ public sealed record ProfileResponse
     public required string? CoverPicture { get; set; }
     public required string? ProfilePicture { get; set; }
     public DateTime CreatedAt { get; set; }
-    public List<string> Providers { get; set; } = new();
 }

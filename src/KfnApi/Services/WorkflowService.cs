@@ -50,7 +50,9 @@ public class WorkflowService : IWorkflowService
 
     public async Task<Result<Producer>> UpdateProducerStateAsync(Guid id, UpdateProducerStateRequest request)
     {
-        var producer = await _databaseContext.Producers.FirstOrDefaultAsync(p => p.Id == id);
+        var producer = await _databaseContext.Producers
+            .Include(f => f.User)
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (producer is null)
             return Result<Producer>.NotFoundResult();

@@ -31,6 +31,9 @@ public class UploadEraser : IHostedService, IDisposable
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        if(string.Equals(_environment.EnvironmentName, "Testing", StringComparison.OrdinalIgnoreCase))
+            return Task.CompletedTask;
+
         _logger.LogInformation("Upload collection service shutting down");
 
         _timer!.Change(Timeout.Infinite, 0);

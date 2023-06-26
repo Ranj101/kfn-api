@@ -1,10 +1,10 @@
-﻿using KfnApi.Helpers.Authentication;
+﻿using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using KfnApi.Helpers.Authentication;
 using KfnApi.Models.Settings;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Logging;
-using Polly;
-using Polly.Extensions.Http;
 
 namespace KfnApi.Configurations.StartupConfigurations;
 
@@ -12,52 +12,44 @@ public static partial class StartupConfigurations
 {
     public static IServiceCollection ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        configuration = configuration.GetRequiredSection(AuthOptions.SectionName);
+        configuration = configuration.GetRequiredSection(FirebaseOptions.SectionName);
 
         services
-            .AddOptions<AuthOptions>()
+            .AddOptions<FirebaseOptions>()
             .Bind(configuration)
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
-        var authOptions = configuration.Get<AuthOptions>();
+        var firebaseOptions = configuration.Get<FirebaseOptions>();
+
+        if (firebaseOptions!.UseFirebase)
+            services.AddSingleton(FirebaseApp.Create(new AppOptions
+            {
+                Credential = GoogleCredential.FromJsonParameters(new JsonCredentialParameters
+                {
+                    Type = firebaseOptions!.Type,
+                    ProjectId = firebaseOptions.ProjectId,
+                    PrivateKeyId = firebaseOptions.PrivateKeyId,
+                    PrivateKey = firebaseOptions.PrivateKey,
+                    ClientEmail = firebaseOptions.ClientEmail,
+                    ClientId = firebaseOptions.ClientId,
+                    TokenUrl = firebaseOptions.TokenUri
+                })
+            }));
 
         services
-            .AddIdentityAuthentication(authOptions!)
             .AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-            {
-                options.Authority = authOptions!.AuthorityUrl;
-                options.Audience = authOptions.Audience;
-            })
+            .AddScheme<AuthenticationSchemeOptions, FirebaseAuthHandler>(JwtBearerDefaults.AuthenticationScheme, _ => {})
             .AddScheme<AuthenticationSchemeOptions, UserAuthHandler>(Constants.AuthScheme, _ => {});
+
+        services.AddScoped<FirebaseAuthenticationFunctionHandler>();
 
         //TODO: Remove this later
         IdentityModelEventSource.ShowPII = true;
-
-        return services;
-    }
-
-    private static IServiceCollection AddIdentityAuthentication(this IServiceCollection services, AuthOptions authOptions)
-    {
-        services.AddHttpClient(AuthDefaults.IdentityClient, client =>
-                client.BaseAddress = new Uri(authOptions.AuthorityUrl))
-                .AddPolicyHandler(HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
-
-        services.AddScoped<MachineToMachineBearerTokenHandler>();
-
-        services.AddHttpClient(AuthDefaults.IdentityWrapperClient, client =>
-                client.BaseAddress = new Uri(authOptions.WrapperUrl))
-                .AddHttpMessageHandler<MachineToMachineBearerTokenHandler>()
-                .AddPolicyHandler(HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
 
         return services;
     }

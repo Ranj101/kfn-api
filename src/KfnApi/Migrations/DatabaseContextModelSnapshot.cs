@@ -346,10 +346,6 @@ namespace KfnApi.Migrations
                     b.Property<Guid?>("ProfilePicture")
                         .HasColumnType("uuid");
 
-                    b.Property<List<string>>("Providers")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
                     b.Property<List<string>>("Roles")
                         .IsRequired()
                         .HasColumnType("text[]");

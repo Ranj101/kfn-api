@@ -2,6 +2,7 @@
 using System.Text.Encodings.Web;
 using KfnApi.Abstractions;
 using KfnApi.Errors.Exceptions;
+using KfnApi.Helpers.Extensions;
 using KfnApi.Models.Entities;
 using KfnApi.Models.Enums.Workflows;
 using Microsoft.AspNetCore.Authentication;
@@ -38,20 +39,15 @@ public class UserAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var userSub = Context.User.Claims.FirstOrDefault(c => c.Type is ClaimTypes.NameIdentifier)?.Value;
+        var identityUserId = Context.User.FindFirstValue(Constants.FirebaseUserClaimType.Id);
 
-        // 1. JWT handler never adds claims from invalid tokens.
-        // 2. Valid tokens MUST always have a name identifier attached.
-        if (string.IsNullOrEmpty(userSub))
+        if (string.IsNullOrEmpty(identityUserId))
             return AuthenticateResult.NoResult();
 
-        var user = await _userService.GetByIdentityIdAsync(userSub) ?? await _userService.EnrollUserAsync(userSub);
-
-        if(user is null)
-            return AuthenticateResult.Fail(new AuthException("User identity not found."));
+        var user = await _userService.GetByIdentityIdAsync(identityUserId) ?? await _userService.EnrollUserAsync(Context.GetFirebaseUser());
 
         if(user.State == UserState.Inactive)
-            return AuthenticateResult.Fail(new AuthException("User is blocked."));
+            return AuthenticateResult.Fail(new AuthException("User is inactive."));
 
         _authContext.SetUser(user);
 

@@ -22,13 +22,11 @@ public class UserService : IUserService
     };
 
     private readonly IFusionCache _cache;
-    private readonly IRemoteUserService _users;
     private readonly DatabaseContext _databaseContext;
 
-    public UserService(IFusionCache cache, DatabaseContext databaseContext, IRemoteUserService users)
+    public UserService(IFusionCache cache, DatabaseContext databaseContext)
     {
         _cache = cache;
-        _users = users;
         _databaseContext = databaseContext;
     }
 
@@ -77,32 +75,22 @@ public class UserService : IUserService
         return paginated;
     }
 
-    public async Task<User?> EnrollUserAsync(string id)
+    public async Task<User> EnrollUserAsync(FirebaseUser identityUser)
     {
-        var authUser = await _users.GetByIdAsync(id);
-
-        if (authUser is null)
-            return null;
-
-        var userRoles = new List<string> { Roles.Customer };
-
-        if (authUser.Roles.Contains("kfn-admin"))
-            userRoles.AddRange(new []{Roles.SuperAdmin, Roles.SystemAdmin});
-
         var newUserId = Guid.NewGuid();
 
         var newUser = new User
         {
-            Roles = userRoles,
+            Roles = new List<string> { Roles.Customer },
             Id = newUserId,
-            IdentityId = authUser.UserId,
-            Email = authUser.Email,
-            FirstName = authUser.Name,
-            LastName = authUser.Nickname,
+            ProfilePicture = identityUser.Picture,
+            IdentityId = identityUser.Id,
+            Email = identityUser.Email,
+            FirstName = identityUser.FirstName,
+            LastName = identityUser.LastName,
             State = UserState.Active,
             CreatedBy = newUserId,
-            CreatedAt = authUser.CreatedAt,
-            Providers = authUser.Identities.Select(i => i.Provider).ToList()
+            CreatedAt = DateTime.UtcNow
         };
 
         var entry = await _databaseContext.Users.AddAsync(newUser);
