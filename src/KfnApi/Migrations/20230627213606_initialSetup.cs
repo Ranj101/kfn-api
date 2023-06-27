@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace KfnApi.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSetup : Migration
+    public partial class initialSetup : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -38,7 +38,6 @@ namespace KfnApi.Migrations
                     Email = table.Column<string>(type: "text", nullable: false),
                     ProfilePicture = table.Column<Guid>(type: "uuid", nullable: true),
                     CoverPicture = table.Column<Guid>(type: "uuid", nullable: true),
-                    Providers = table.Column<List<string>>(type: "text[]", nullable: false),
                     Roles = table.Column<List<string>>(type: "text[]", nullable: false),
                     State = table.Column<int>(type: "integer", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),

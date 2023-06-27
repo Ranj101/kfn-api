@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KfnApi.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230427080513_InitialSetup")]
-    partial class InitialSetup
+    [Migration("20230627213606_initialSetup")]
+    partial class initialSetup
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -348,10 +348,6 @@ namespace KfnApi.Migrations
 
                     b.Property<Guid?>("ProfilePicture")
                         .HasColumnType("uuid");
-
-                    b.Property<List<string>>("Providers")
-                        .IsRequired()
-                        .HasColumnType("text[]");
 
                     b.Property<List<string>>("Roles")
                         .IsRequired()
