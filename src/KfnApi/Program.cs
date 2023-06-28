@@ -44,8 +44,19 @@ services.ConfigureCache(configuration)
         .ConfigureCloudStorage(configuration)
         .ConfigureAuthentication(configuration);
 
+services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
+app.UseCors();
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI();
