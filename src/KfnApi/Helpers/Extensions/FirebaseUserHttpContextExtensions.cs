@@ -15,12 +15,12 @@ public static class FirebaseUserHttpContextExtensions
         var username = claimsPrincipal.FindFirstValue(Constants.FirebaseUserClaimType.Username);
         var conversionResult = bool.TryParse(claimsPrincipal.FindFirstValue(Constants.FirebaseUserClaimType.EmailVerified), out var emailVerified);
 
-        if (id is null || email is null || username is null || !conversionResult)
+        if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(username) || !conversionResult)
             throw new Exception("Some firebase user claims are missing.");
 
         Guid? pictureId = null;
 
-        if (picture is not null)
+        if (!string.IsNullOrWhiteSpace(picture))
         {
             try
             { pictureId = Guid.Parse(picture); }
