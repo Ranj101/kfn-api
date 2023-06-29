@@ -83,7 +83,8 @@ public class UserService : IUserService
         {
             Roles = new List<string> { Roles.Customer },
             Id = newUserId,
-            ProfilePicture = identityUser.Picture,
+            ProfilePicture = identityUser.ProfilePicture ?? Constants.DefaultUserProfilePicture,
+            CoverPicture = Constants.DefaultUserCoverPicture,
             IdentityId = identityUser.Id,
             Email = identityUser.Email,
             FirstName = identityUser.FirstName,

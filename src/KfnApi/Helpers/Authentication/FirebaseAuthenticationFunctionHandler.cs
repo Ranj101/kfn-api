@@ -60,7 +60,7 @@ public class FirebaseAuthenticationFunctionHandler
             new (Constants.FirebaseUserClaimType.Id, claims.GetValueOrDefault("user_id", "").ToString()!),
             new (Constants.FirebaseUserClaimType.Username, claims.GetValueOrDefault("name", "").ToString()!),
             new (Constants.FirebaseUserClaimType.Email, claims.GetValueOrDefault("email", "").ToString()!),
-            new (Constants.FirebaseUserClaimType.Picture, claims.GetValueOrDefault("picture", "").ToString()!),
+            new (Constants.FirebaseUserClaimType.ProfilePicture, claims.GetValueOrDefault("picture", "").ToString()!),
             new (Constants.FirebaseUserClaimType.EmailVerified, claims.GetValueOrDefault("email_verified", "").ToString()!),
         };
     }

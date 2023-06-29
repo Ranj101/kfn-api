@@ -35,7 +35,7 @@ public class TokenHandler : ITokenHandler
             claims.AddRange(new List<Claim>
             {
                 new(Constants.FirebaseUserClaimType.Email, firebaseUser.Email),
-                new(Constants.FirebaseUserClaimType.Picture, Constants.DefaultProductPicture.ToString()),
+                new(Constants.FirebaseUserClaimType.ProfilePicture, Constants.DefaultProductPicture.ToString()),
                 new(Constants.FirebaseUserClaimType.Username, firebaseUser.FirstName + "_+_" + firebaseUser.LastName),
                 new(Constants.FirebaseUserClaimType.EmailVerified, firebaseUser.EmailVerified.ToString())
             });

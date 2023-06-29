@@ -4,16 +4,16 @@ public class FirebaseUser
 {
     public string Id { get; }
     public string Email { get; }
-    public Guid? Picture { get; }
+    public Guid? ProfilePicture { get; }
     public string FirstName { get; }
     public string LastName { get; }
     public bool EmailVerified { get; }
 
-    public FirebaseUser(string id, string email, string firstName, string lastName, Guid? picture, bool emailVerified)
+    public FirebaseUser(string id, string email, string firstName, string lastName, Guid? profilePicture, bool emailVerified)
     {
         Id = id;
         Email = email;
-        Picture = picture;
+        ProfilePicture = profilePicture;
         FirstName = firstName;
         LastName = lastName;
         EmailVerified = emailVerified;
