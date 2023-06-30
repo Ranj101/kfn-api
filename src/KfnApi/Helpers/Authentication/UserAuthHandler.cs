@@ -2,6 +2,7 @@
 using System.Text.Encodings.Web;
 using KfnApi.Abstractions;
 using KfnApi.Errors.Exceptions;
+using KfnApi.Helpers.Authorization;
 using KfnApi.Helpers.Extensions;
 using KfnApi.Models.Entities;
 using KfnApi.Models.Enums.Workflows;
@@ -39,6 +40,15 @@ public class UserAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
+        if (!Context.Request.Headers.ContainsKey("Authorization"))
+        {
+            _authContext.SetAnonymous();
+
+            var anonymousClaimsIdentity = new ClaimsIdentity(GenerateAnonymousClaims(), nameof(UserAuthHandler));
+            var anonymousTicket = new AuthenticationTicket(new ClaimsPrincipal(anonymousClaimsIdentity), Scheme.Name);
+            return AuthenticateResult.Success(anonymousTicket);
+        }
+
         var identityUserId = Context.User.FindFirstValue(Constants.FirebaseUserClaimType.Id);
 
         if (string.IsNullOrEmpty(identityUserId))
@@ -65,6 +75,16 @@ public class UserAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
         claims.AddRange(user.Roles.Select(role
             => new Claim(ClaimTypes.Role, role)));
+
+        return claims;
+    }
+
+    private static IEnumerable<Claim> GenerateAnonymousClaims()
+    {
+        var claims = new List<Claim>
+        {
+            new (ClaimTypes.Role, Roles.Anonymous)
+        };
 
         return claims;
     }

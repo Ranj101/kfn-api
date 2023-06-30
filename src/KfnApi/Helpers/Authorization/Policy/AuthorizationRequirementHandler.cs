@@ -26,7 +26,7 @@ public class AuthorizationRequirementHandler : AuthorizationHandler<Authorizatio
     {
         var permissions = requirement.Permissions;
 
-        if (!_authContext.HasUser())
+        if (!_authContext.HasUser() && !_authContext.IsAnonymous())
         {
             context.Fail();
             return;

@@ -23,7 +23,8 @@ public class RoleMap : IRoleMap
             { Roles.SuperAdmin, allPermissions },
             { Roles.SystemAdmin, allPermissions },
             { Roles.Producer, GetProducerPermissions() },
-            { Roles.Customer, GetCustomerPermissions() }
+            { Roles.Customer, GetCustomerPermissions() },
+            { Roles.Anonymous, GetAnonymousPermissions() }
         };
     }
 
@@ -63,6 +64,21 @@ public class RoleMap : IRoleMap
             Permission.UpdateSelf,
             Permission.UpdateForm,
             Permission.UpdateOrderState
+        };
+    }
+
+    private static Permission[] GetAnonymousPermissions()
+    {
+        return new[]
+        {
+            Permission.GetBasicOrders,
+            Permission.GetProducerPages,
+            Permission.GetProducts,
+            Permission.GetUserProfiles,
+            Permission.GetProducerPageById,
+            Permission.GetUserProfileById,
+            Permission.SubmitForm,
+            Permission.UploadFile,
         };
     }
 }

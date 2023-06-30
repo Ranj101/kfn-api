@@ -14,7 +14,7 @@ public class PermissionService : IPermissionService
 
     public bool HasPermission(Permission permissionToAccess)
     {
-        if (!_authContext.HasUser())
+        if (!_authContext.HasUser() && !_authContext.IsAnonymous())
             return false;
 
         if (permissionToAccess is Permission.None)
@@ -27,7 +27,7 @@ public class PermissionService : IPermissionService
 
     public bool HasAnyPermission(HashSet<Permission> permissionsToAccess)
     {
-        if (!_authContext.HasUser())
+        if (!_authContext.HasUser() && !_authContext.IsAnonymous())
             return false;
 
         if (permissionsToAccess.Count == 1  && permissionsToAccess.First() is Permission.None)

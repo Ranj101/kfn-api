@@ -2,6 +2,8 @@
 
 public static class Roles
 {
+    public const string Anonymous = "anonymous";
+
     public const string Customer = "customer";
     public const string Producer = "producer";
 

@@ -10,8 +10,10 @@ public interface IAuthContext
     Guid GetUserId();
     bool IsAdmin();
     bool IsProducer();
+    bool IsAnonymous();
     bool IsSuperAdmin();
     bool IsSystemAdmin();
     HashSet<Permission> GetPermissions();
     void SetUser(User user);
+    void SetAnonymous();
 }

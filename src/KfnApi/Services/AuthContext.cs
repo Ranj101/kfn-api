@@ -12,6 +12,7 @@ public class AuthContext : IAuthContext
     private bool _isSuperAdmin;
     private bool _isSystemAdmin;
     private bool _isProducer;
+    private bool _isAnonymous;
     private HashSet<Permission> _permissions = new();
 
     public AuthContext(IRoleMap roleMap)
@@ -40,6 +41,9 @@ public class AuthContext : IAuthContext
     public bool IsSystemAdmin()
         => _isSystemAdmin;
 
+    public bool IsAnonymous()
+        => _isAnonymous;
+
     public HashSet<Permission> GetPermissions()
         => _permissions;
 
@@ -55,5 +59,15 @@ public class AuthContext : IAuthContext
             .Where(kvp => user.Roles.Contains(kvp.Key))
             .SelectMany(kvp => kvp.Value)
             .ToHashSet();
+    }
+
+    public void SetAnonymous()
+    {
+        _isAnonymous = true;
+
+        _permissions =_roleMap
+            .GetRoleDefinitions()
+            .FirstOrDefault(kvp => Roles.Anonymous.Equals(kvp.Key))
+            .Value.ToHashSet();
     }
 }
