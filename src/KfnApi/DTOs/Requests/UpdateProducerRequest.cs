@@ -6,6 +6,7 @@ namespace KfnApi.DTOs.Requests;
 public sealed record UpdateProducerRequest
 {
     [Required]
+    [MinLength(1), MaxLength(3)]
     public required List<string> Locations { get; set; }
 
     [Required]
