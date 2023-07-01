@@ -320,7 +320,7 @@ public static class Mappers
             ProducerName = product.Producer.Name,
             Picture = pictureUrl!,
             State = product.State,
-            PricesByWeight = product.Prices.Select(x => x.ToPriceByWeightResponse()).ToList()
+            PricesByWeight = product.Prices.OrderBy(x => x.Weight).Select(x => x.ToPriceByWeightResponse()).ToList()
         };
     }
 
