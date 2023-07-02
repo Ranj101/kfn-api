@@ -294,6 +294,7 @@ public static class Mappers
         {
             Id = product.Id,
             Name = product.Name,
+            ProducerId = product.Producer.Id,
             ProducerName = product.Producer.Name,
             Picture = pictureUrl!,
             State = product.State,
