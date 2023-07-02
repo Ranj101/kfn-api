@@ -299,7 +299,7 @@ public static class Mappers
             State = product.State,
             CreatedAt = product.CreatedAt,
             UpdatedAt = product.UpdatedAt,
-            PricesByWeight = product.Prices.Select(x => x.ToPriceByWeightResponse()).ToList()
+            PricesByWeight = product.Prices.OrderBy(x => x.Weight).Select(x => x.ToPriceByWeightResponse()).ToList()
         };
     }
 
