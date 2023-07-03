@@ -94,6 +94,7 @@ public static class Mappers
             LastName = user.LastName,
             CoverPicture = coverUrl,
             ProfilePicture = profileUrl,
+            ProducerId = user.Producer?.Id,
             CreatedBy = user.CreatedBy,
             UpdatedBy = user.UpdatedBy,
             CreatedAt = user.CreatedAt,

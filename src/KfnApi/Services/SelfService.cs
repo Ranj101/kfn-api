@@ -24,6 +24,7 @@ public class SelfService : ISelfService
     public async Task<User?> GetSelfAsync()
     {
         return await _databaseContext.Users
+            .Include(u => u.Producer)
             .FirstOrDefaultAsync(u => u.Id == _authContext.GetUserId());
     }
 

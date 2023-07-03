@@ -10,6 +10,7 @@ public sealed record SelfResponse
     public string? CoverPicture { get; set; }
     public string? ProfilePicture { get; set; }
     public List<string> Roles { get; set; } = new();
+    public Guid? ProducerId { get; set; }
 
     public required Guid CreatedBy { get; init; }
     public Guid? UpdatedBy { get; set; }
